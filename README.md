@@ -1,61 +1,185 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Nautica v2
+
+**Shipping Vessel Parking Slot Rental Service**
+
+[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php)](https://php.net)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+---
+
+## 🚢 About Nautica
+
+Nautica is a modern **API-first vessel parking slot rental service** designed for marinas, ports, and shipping facilities. It provides comprehensive management of vessel bookings, slot assignments, billing, and operational workflows.
+
+### Key Features
+
+- **🎯 API-First Architecture** - RESTful API with Livewire/Alpine frontend
+- **⚙️ Configuration-Driven** - No hard enums, fully configurable types and settings
+- **🏢 Multi-Tenant Ready** - Support multiple properties/marinas
+- **👥 Role-Based Access** - Admin and client user roles with granular permissions
+- **📊 Complete Workflow** - From booking request to check-out and billing
+- **💰 Advanced Billing** - Flexible contracts, invoicing, and payment processing
+- **📅 Operational Tools** - Schedule views, reports, and management dashboards
+
+---
+
+## 🏗️ Architecture
+
+### Physical Hierarchy
+```
+Property → Block → Zone → Slot
+```
+
+### Core Workflow
+```
+Client Request → Admin Approval → Slot Assignment → Contract → Billing → Check-in/out
+```
+
+### Tech Stack
+- **Backend**: Laravel 11 (PHP 8.2+)
+- **Frontend**: Livewire + Alpine.js
+- **Database**: PostgreSQL (JSON support)
+- **Authentication**: Laravel Sanctum + Spatie Permissions
+- **API**: RESTful JSON responses
+
+---
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+1. **[System Overview](docs/01_system-overview.md)** - Architecture and concepts
+2. **[Configuration Model](docs/02_configuration-model.md)** - Flexible type system
+3. **[Roles & Permissions](docs/03_roles-and-permissions.md)** - Access control
+4. **[Property Hierarchy](docs/04_property-hierarchy.md)** - Physical structure
+5. **[Core Entities](docs/05_entities-core.md)** - Data models
+6. **[Financial Entities](docs/06_entities-finance.md)** - Billing & payments
+7. **[Booking Workflow](docs/07_workflow-bookings.md)** - Business processes
+8. **[Billing & Invoicing](docs/08_billing-and-invoicing.md)** - Financial workflows
+9. **[Schedule & Reports](docs/09_schedule-and-reports.md)** - Operational views
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- Node.js & npm
+- PostgreSQL
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/EhaabShareef/nautica-v2.git
+   cd nautica-v2
+   ```
+
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
+
+3. **Environment setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Database setup**
+   ```bash
+   # Configure database in .env file
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+5. **Build assets**
+   ```bash
+   npm run build
+   ```
+
+6. **Start development server**
+   ```bash
+   php artisan serve
+   ```
+
+---
+
+## 🎯 Core Concepts
+
+### Organizations & Users
+- **Organizations**: Vessel owners, operators, agents
+- **Users**: Admin staff and client users
+- **Multi-tenant**: Data isolation by organization
+
+### Physical Structure
+- **Properties**: Individual marinas/ports
+- **Blocks**: Sections within properties (quays/piers)
+- **Zones**: Sub-areas within blocks
+- **Slots**: Individual parking spaces with constraints
+
+### Booking Lifecycle
+1. **Request** - Client submits booking request
+2. **Approval** - Admin reviews and assigns slot
+3. **Confirmation** - Contract created with pricing
+4. **Check-in/out** - Operational tracking
+5. **Billing** - Automated invoicing and payments
+
+---
+
+## 🛠️ Development
+
+### Database Schema
+The application uses a flexible, configuration-driven approach:
+- **No hard enums** - All types stored in `app_types` table
+- **JSON fields** - Flexible metadata and settings
+- **UUID primary keys** - Better for distributed systems
+
+### API Design
+RESTful API following Laravel conventions:
+- Resource controllers
+- API versioning ready
+- JSON responses
+- Authentication via Sanctum
+
+### Testing
+```bash
+# Run tests
+php artisan test
+
+# Run specific test suite
+php artisan test --testsuite=Feature
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🆘 Support
+
+- **Documentation**: [`docs/`](docs/) directory
+- **Issues**: [GitHub Issues](https://github.com/EhaabShareef/nautica-v2/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/EhaabShareef/nautica-v2/discussions)
+
+---
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <strong>Built with ❤️ using Laravel</strong>
 </p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
