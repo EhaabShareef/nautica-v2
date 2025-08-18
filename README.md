@@ -106,6 +106,13 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
    php artisan serve
    ```
 
+### Demo Accounts
+- Admin: admin@example.com / password
+- Client: client@example.com / password
+
+### Configuration
+Dictionary and settings are defined in `config/nautica.php`.
+
 ---
 
 ## 🎯 Core Concepts
