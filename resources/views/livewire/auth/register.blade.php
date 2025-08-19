@@ -46,6 +46,7 @@
                     <label for="password" style="display: block; font-weight: 500; color: var(--foreground); margin-bottom: 0.5rem; font-size: 0.875rem;">
                         <x-heroicon name="lock-closed" class="w-4 h-4 inline mr-2" />
                         Password
+                    </label>
                     <input id="password" name="password" type="password" wire:model.defer="password" class="form-input" required autocomplete="new-password" minlength="8"
                            @error('password') aria-invalid="true" aria-describedby="password-error" @enderror
                            placeholder="Create a secure password">
@@ -53,8 +54,6 @@
                         <p id="password-error" role="alert" style="color: var(--destructive); font-size: 0.75rem; margin-top: 0.25rem;">
                             {{ $message }}
                         </p>
-                    @enderror
-                        </p> 
                     @enderror
                 </div>
 

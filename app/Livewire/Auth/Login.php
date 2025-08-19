@@ -31,8 +31,16 @@ class Login extends Component
             return;
         }
 
+        $throttleKey = Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $this->addError('email', 'Too many login attempts. Please try again later.');
+            return;
+        }
+
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
             session()->regenerate();
+            RateLimiter::clear($throttleKey);
             
             $user = Auth::user();
             
@@ -41,16 +49,16 @@ class Login extends Component
                 $intended = '/admin/dashboard';
             } elseif ($user->hasRole('agent')) {
                 $intended = '/agent/dashboard';
-        $this->addError('email', 'Invalid credentials.');
-        RateLimiter::hit($throttleKey, 60);
-        $this->reset('password');
-    }
+            } else {
+                $intended = '/client/dashboard';
             }
 
             return redirect()->intended($intended);
         }
 
         $this->addError('email', 'Invalid credentials.');
+        RateLimiter::hit($throttleKey, 60);
+        $this->reset('password');
     }
 
     public function render()
