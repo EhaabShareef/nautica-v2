@@ -55,7 +55,7 @@ class Booking extends Model
 
     public function setStatusAttribute($value)
     {
-        if (!Dictionary::isValid('booking_statuses', $value)) {
+        if (!Dictionary::isValid('booking_status', $value)) {
             throw new \InvalidArgumentException('Invalid booking status');
         }
         $this->attributes['status'] = $value;
