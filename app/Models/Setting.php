@@ -10,14 +10,14 @@ class Setting extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'setting_key';
+    protected $primaryKey = 'key';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['setting_key', 'value'];
+    protected $fillable = ['key', 'value'];
 
     protected $casts = [
-        // Removed 'value' => 'array' to use custom accessor below
+        // value handled via accessor
     ];
 
     /**
@@ -30,25 +30,25 @@ class Setting extends Model
                 if (is_null($value)) {
                     return null;
                 }
-                
+
                 $decoded = json_decode($value, true);
-                
+
                 // If json_decode failed, return the original value
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     return $value;
                 }
-                
+
                 return $decoded;
             },
             set: function (mixed $value): string {
                 $encoded = json_encode($value);
-                
+
                 if ($encoded === false) {
                     throw new \InvalidArgumentException(
                         'Failed to JSON encode value: ' . json_last_error_msg()
                     );
                 }
-                
+
                 return $encoded;
             }
         );

@@ -14,9 +14,9 @@ class RolesAndPermissionsSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $permissions = [
-            'manage properties',
-            'manage resources',
-            'manage slots',
+            'config.manage',
+            'config.settings.manage',
+            'config.roles.manage',
             'manage bookings',
             'approve bookings',
             'manage contracts',

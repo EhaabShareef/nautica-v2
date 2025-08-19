@@ -7,20 +7,22 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('properties', function (Blueprint $table) {
+        Schema::create('zones', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('block_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('code')->unique();
-            $table->string('timezone')->nullable();
-            $table->string('currency', 3)->nullable();
-            $table->string('address')->nullable();
+            $table->string('code');
+            $table->string('location')->nullable();
+            $table->text('notes')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->unique(['block_id', 'code']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('properties');
+        Schema::dropIfExists('zones');
     }
 };
