@@ -2,23 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Slot extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
-    protected $fillable = ['resource_id', 'start_at', 'end_at', 'is_available'];
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    protected $casts = [
-        'start_at' => 'datetime',
-        'end_at' => 'datetime',
-        'is_available' => 'boolean',
+    protected $fillable = [
+        'zone_id', 'code', 'location', 'max_loa_m', 'max_beam_m', 'max_draft_m', 'shore_power', 'is_active',
     ];
 
-    public function resource()
+    protected $casts = [
+        'shore_power' => 'boolean',
+        'is_active' => 'boolean',
+        'max_loa_m' => 'float',
+        'max_beam_m' => 'float',
+        'max_draft_m' => 'float',
+    ];
+
+    public function zone()
     {
-        return $this->belongsTo(Resource::class);
+        return $this->belongsTo(Zone::class);
     }
 }

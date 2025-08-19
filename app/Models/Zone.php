@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Property extends Model
+class Zone extends Model
 {
     use HasFactory, HasUuids;
 
@@ -14,15 +14,20 @@ class Property extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'name', 'code', 'timezone', 'currency', 'address', 'is_active',
+        'block_id', 'name', 'code', 'location', 'notes', 'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
 
-    public function blocks()
+    public function block()
     {
-        return $this->hasMany(Block::class);
+        return $this->belongsTo(Block::class);
+    }
+
+    public function slots()
+    {
+        return $this->hasMany(Slot::class);
     }
 }

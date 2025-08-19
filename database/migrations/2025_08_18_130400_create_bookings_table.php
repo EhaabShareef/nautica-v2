@@ -11,9 +11,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('vessel_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('property_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('resource_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('slot_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('property_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('block_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('zone_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('slot_id')->nullable()->constrained()->nullOnDelete();
             $table->dateTime('start_at');
             $table->dateTime('end_at');
             $table->string('status');

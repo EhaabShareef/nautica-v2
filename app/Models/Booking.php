@@ -12,7 +12,7 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'client_id','vessel_id','property_id','resource_id','slot_id',
+        'client_id','vessel_id','property_id','block_id','zone_id','slot_id',
         'start_at','end_at','status','type','priority','hold_expires_at',
         'notes','admin_notes'
     ];
@@ -38,9 +38,14 @@ class Booking extends Model
         return $this->belongsTo(Property::class);
     }
 
-    public function resource()
+    public function block()
     {
-        return $this->belongsTo(Resource::class);
+        return $this->belongsTo(Block::class);
+    }
+
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
     }
 
     public function slot()
