@@ -17,6 +17,11 @@ class Slot extends Model
         'is_available' => 'boolean',
     ];
 
+    /**
+     * Get the resource that owns this slot.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function resource()
     {
         return $this->belongsTo(Resource::class);

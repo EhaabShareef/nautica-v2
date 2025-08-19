@@ -9,6 +9,14 @@ use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
+    /**
+     * Seed initial roles and permissions into the database.
+     *
+     * Clears Spatie's permission cache, ensures a set of application permissions exist,
+     * and creates/synchronizes roles with their assigned permissions (idempotent).
+     *
+     * @return void
+     */
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();

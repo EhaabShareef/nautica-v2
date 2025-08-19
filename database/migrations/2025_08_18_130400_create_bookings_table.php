@@ -5,6 +5,23 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    /**
+     * Create the `bookings` database table.
+     *
+     * The table includes:
+     * - id (primary key)
+     * - client_id -> users (cascade on delete)
+     * - vessel_id -> vessels (nullable, set null on delete)
+     * - property_id -> properties (cascade on delete)
+     * - resource_id -> resources (nullable, set null on delete)
+     * - slot_id -> slots (nullable, set null on delete)
+     * - start_at, end_at (dateTime)
+     * - status (string)
+     * - type, priority (nullable strings)
+     * - hold_expires_at (nullable dateTime)
+     * - notes, admin_notes (nullable text)
+     * - timestamps (created_at, updated_at)
+     */
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
@@ -26,6 +43,11 @@ return new class extends Migration {
         });
     }
 
+    /**
+     * Reverse the migration by dropping the `bookings` table if it exists.
+     *
+     * Removes the table created in up(), allowing this migration to be rolled back safely.
+     */
     public function down(): void
     {
         Schema::dropIfExists('bookings');

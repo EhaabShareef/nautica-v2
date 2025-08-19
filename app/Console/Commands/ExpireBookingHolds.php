@@ -12,6 +12,15 @@ class ExpireBookingHolds extends Command
 
     protected $description = 'Release expired booking holds';
 
+    /**
+     * Release booking holds that have expired.
+     *
+     * Finds bookings with status "on_hold" whose `hold_expires_at` is in the past,
+     * updates them to status "requested" and clears `hold_expires_at`, and writes
+     * an informational message with the number of affected rows.
+     *
+     * @return int Command exit code (Command::SUCCESS on success).
+     */
     public function handle(): int
     {
         $count = Booking::where('status', 'on_hold')

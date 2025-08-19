@@ -16,21 +16,47 @@ class Invoice extends Model
         'due_at' => 'datetime',
     ];
 
+    /**
+     * Get the contract that owns this invoice.
+     *
+     * Returns the inverse one-to-many Eloquent relation linking the invoice to its Contract.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function contract()
     {
         return $this->belongsTo(Contract::class);
     }
 
+    /**
+     * Get the booking that this invoice belongs to.
+     *
+     * Defines an inverse one-to-many relation to the Booking model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function booking()
     {
         return $this->belongsTo(Booking::class);
     }
 
+    /**
+     * Get the invoice line items for this invoice.
+     *
+     * Defines a one-to-many Eloquent relationship to App\Models\InvoiceLine.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function lines()
     {
         return $this->hasMany(InvoiceLine::class);
     }
 
+    /**
+     * Get the payments for this invoice.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany The payments associated with the invoice.
+     */
     public function payments()
     {
         return $this->hasMany(Payment::class);

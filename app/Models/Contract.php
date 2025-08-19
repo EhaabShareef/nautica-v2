@@ -17,11 +17,21 @@ class Contract extends Model
         'terms_json' => 'array',
     ];
 
+    /**
+     * Get the booking that this contract belongs to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function booking()
     {
         return $this->belongsTo(Booking::class);
     }
 
+    /**
+     * Get the invoices for the contract.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany Relationship to Invoice models.
+     */
     public function invoices()
     {
         return $this->hasMany(Invoice::class);

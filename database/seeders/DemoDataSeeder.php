@@ -16,6 +16,14 @@ use Illuminate\Support\Facades\Hash;
 
 class DemoDataSeeder extends Seeder
 {
+    /**
+     * Seed a complete set of demo data into the database.
+     *
+     * Creates an admin and a client user (with roles and hashed passwords), a property
+     * with a resource and a future slot, a vessel for the client, an approved booking
+     * (with a booking log), a contract for the booking, an invoice for the contract,
+     * and a single invoice line ("Docking Fee").
+     */
     public function run(): void
     {
         // Create users
