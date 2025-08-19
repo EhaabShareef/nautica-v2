@@ -1,18 +1,36 @@
 <?php
 
-use App\Http\Livewire\Admin\Dashboard as AdminDashboard;
-use App\Http\Livewire\Auth\Login;
-use App\Http\Livewire\Auth\Register;
-use App\Http\Livewire\Client\Dashboard as ClientDashboard;
-use App\Http\Livewire\LandingPage;
+use App\Livewire\Admin\Dashboard as AdminDashboard;
+use App\Livewire\Auth\Login;
+use App\Livewire\Auth\Register;
+use App\Livewire\Client\Dashboard as ClientDashboard;
+use App\Livewire\LandingPage;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\LogoutController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', LandingPage::class);
+Route::get('/', LandingPage::class)->name('home');
 
-Route::get('/login', Login::class)->name('login')->middleware('guest');
-Route::get('/register', Register::class)->middleware('guest');
+// Authentication routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', Login::class)->name('login');
+    Route::get('/register', Register::class)->name('register');
+});
 
-Route::middleware('auth')->group(function () {
-    Route::get('/client/dashboard', ClientDashboard::class)->middleware('role:client');
-    Route::get('/admin/dashboard', AdminDashboard::class)->middleware('role:admin');
+// Logout route
+Route::post('/logout', [LogoutController::class, '__invoke'])->middleware('auth')->name('logout');
+
+// Admin routes group
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+});
+
+// Client routes group  
+Route::middleware(['auth', 'client'])->prefix('client')->name('client.')->group(function () {
+    Route::get('/dashboard', ClientDashboard::class)->name('dashboard');
+});
+
+// Agent routes group (for future expansion)
+Route::middleware(['auth', 'agent'])->prefix('agent')->name('agent.')->group(function () {
+    // Future agent routes here
 });

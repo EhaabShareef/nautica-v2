@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Livewire\Auth;
+namespace App\Livewire\Auth;
 
+use App\Models\Activity;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +30,16 @@ class Register extends Component
 
         $user->assignRole('client');
 
+        // Log the registration activity
+        Activity::log(
+            'user_registered',
+            "New user registered: {$user->name}",
+            null, // No authenticated user yet
+            $user
+        );
+
         Auth::login($user);
+        session()->regenerate();
 
         return redirect()->intended('/client/dashboard');
     }

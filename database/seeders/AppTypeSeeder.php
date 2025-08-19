@@ -81,7 +81,6 @@ class AppTypeSeeder extends Seeder
                 AppType::updateOrCreate(
                     ['group' => $group, 'code' => $item['code']],
                     [
-                        'id' => Str::uuid()->toString(),
                         'label' => $item['label'],
                         'is_active' => true,
                     ]

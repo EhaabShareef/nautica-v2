@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Livewire\Auth;
+namespace App\Livewire\Auth;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Component;
-
 class Login extends Component
 {
     public string $email = '';
@@ -31,12 +32,22 @@ class Login extends Component
         }
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
+            session()->regenerate();
+            
             $user = Auth::user();
+            
+            // Default intended route based on role
             if ($user->hasRole('admin')) {
-                return redirect()->intended('/admin/dashboard');
+                $intended = '/admin/dashboard';
+            } elseif ($user->hasRole('agent')) {
+                $intended = '/agent/dashboard';
+        $this->addError('email', 'Invalid credentials.');
+        RateLimiter::hit($throttleKey, 60);
+        $this->reset('password');
+    }
             }
 
-            return redirect()->intended('/client/dashboard');
+            return redirect()->intended($intended);
         }
 
         $this->addError('email', 'Invalid credentials.');
