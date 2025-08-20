@@ -6,141 +6,70 @@ use App\Models\Block;
 use App\Models\Property;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Validation\Rule;
-use Illuminate\Database\QueryException;
 
 class Blocks extends Component
 {
-    use WithPagination, AuthorizesRequests;
+    use WithPagination;
 
-    public $showModal = false;
-    public $editingBlock = null;
+    public $search = '';
+    public $showInactive = false;
 
-    public $property_id = '';
-    public $name = '';
-    public $code = '';
-    public $location = '';
-    public $is_active = true;
-
-    protected function rules(): array
-    {
-        return [
-            'property_id' => 'required|exists:properties,id',
-            'name' => 'required|string|max:255',
-            'code' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('blocks', 'code')
-                    ->where(fn($q) => $q->where('property_id', $this->property_id))
-                    ->ignore($this->editingBlock?->id),
-            ],
-            'location' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-        ];
-    }
+    protected $listeners = [
+        'block:saved' => '$refresh',
+        'block:deleted' => '$refresh',
+    ];
 
     public function create()
     {
-        $this->authorize('create', Block::class);
-        $this->resetForm();
-        $this->showModal = true;
+        $this->dispatch('block:create');
     }
 
-    public function edit(Block $block)
+    public function edit($blockId)
     {
-        $this->authorize('update', $block);
-        $this->editingBlock = $block;
-        $this->property_id = $block->property_id;
-        $this->name = $block->name;
-        $this->code = $block->code;
-        $this->location = $block->location;
-        $this->is_active = $block->is_active;
-        $this->showModal = true;
+        $this->dispatch('block:edit', $blockId);
     }
 
-    public function save()
+    public function delete($blockId)
     {
-        $this->validate();
-
-        // Check unique constraint for property_id + code
-        $query = Block::where('property_id', $this->property_id)
-            ->where('code', $this->code);
-
-        if ($this->editingBlock) {
-            $query->where('id', '!=', $this->editingBlock->id);
-        }
-
-        if ($query->exists()) {
-            $this->addError('code', 'Code must be unique within this property.');
-            return;
-        }
-
-        $data = [
-            'property_id' => $this->property_id,
-            'name' => $this->name,
-            'code' => $this->code,
-            'location' => $this->location,
-            'is_active' => $this->is_active,
-        ];
-
-        try {
-            if ($this->editingBlock) {
-                $this->editingBlock->update($data);
-                session()->flash('message', 'Block updated successfully!');
-            } else {
-                Block::create($data);
-                session()->flash('message', 'Block created successfully!');
-            }
-            $this->closeModal();
-        } catch (\Illuminate\Database\QueryException $e) {
-            if ($e->getCode() === '23000') {
-                $this->addError('code', 'Code must be unique within this property.');
-            } else {
-                session()->flash('error', 'An error occurred while saving the block.');
-            }
-        }
+        $this->dispatch('block:delete', $blockId);
     }
 
-    public function delete(Block $block)
+    public function updatedSearch()
     {
-        $this->authorize('delete', $block);
-        try {
-            $block->delete();
-            session()->flash('message', 'Block deleted successfully!');
-        } catch (\Illuminate\Database\QueryException $e) {
-            // SQLSTATE[23000]: Integrity constraint violation
-            if ($e->getCode() === '23000') {
-                session()->flash('error', 'Block could not be deleted because it is referenced by other records.');
-            } else {
-                session()->flash('error', 'An error occurred while deleting the block.');
-            }
-        }
+        $this->resetPage();
     }
 
-    public function closeModal()
+    public function updatedShowInactive()
     {
-        $this->showModal = false;
-        $this->resetForm();
+        $this->resetPage();
     }
 
-    protected function resetForm()
+    public function toggleInactiveFilter()
     {
-        $this->editingBlock = null;
-        $this->property_id = '';
-        $this->name = '';
-        $this->code = '';
-        $this->location = '';
-        $this->is_active = true;
-        $this->resetErrorBag();
+        $this->showInactive = !$this->showInactive;
+        $this->resetPage();
     }
 
     public function render()
     {
+        $query = Block::with('property')->withCount('zones');
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('code', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        if ($this->showInactive) {
+            $query->where('is_active', false);
+        } else {
+            $query->where('is_active', true);
+        }
+
         return view('livewire.admin.configuration.blocks', [
-            'blocks' => Block::with(['property', 'zones'])->paginate(10),
-            'properties' => Property::where('is_active', true)->get()
+            'blocks' => $query->paginate(10),
+            'properties' => Property::where('is_active', true)->get(),
         ]);
     }
 }

@@ -9,13 +9,21 @@
                 Admin Dashboard - Manage your Nautica system
             </p>
         </div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-                <x-heroicon name="arrow-right-on-rectangle" class="w-4 h-4" />
-                Logout
-            </button>
-        </form>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+            @role('admin')
+                <a href="{{ route('admin.configuration') }}" class="btn-secondary" style="font-size:0.875rem; padding:0.5rem 1rem; display:inline-flex; align-items:center; gap:0.25rem;">
+                    <x-heroicon name="cog-6-tooth" class="w-4 h-4" />
+                    Configuration
+                </a>
+            @endrole
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+                    <x-heroicon name="arrow-right-on-rectangle" class="w-4 h-4" />
+                    Logout
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Quick Stats -->
