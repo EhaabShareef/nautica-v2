@@ -97,6 +97,36 @@ body {
     line-height: 1.6;
 }
 
+/* Configuration page */
+.config-page .sys-title { color: var(--foreground); }
+.config-page .sys-subtitle { color: var(--muted-foreground); }
+
+.config-page .sys-border { border-color: var(--border); }
+
+/* Tabs */
+.config-page .tab-button.sys-tab {
+  border-bottom: 2px solid transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.config-page .tab-button.sys-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Animations */
+.config-page .fade-in { animation: fade-in .28s ease-out both; }
+.config-page .slide-up { animation: slide-up .32s ease-out both; }
+
+@keyframes fade-in { from { opacity:0 } to { opacity:1 } }
+@keyframes slide-up { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
+
+/* Mobile niceties */
+.config-page .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.config-page .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+
 /* Component utilities */
 @utility btn {
     display: inline-flex;
@@ -153,6 +183,35 @@ body {
         color: var(--accent-foreground);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+@utility btn-destructive {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius);
+    background-color: transparent;
+    color: var(--destructive);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 140px;
+    
+    &:hover {
+        background-color: color-mix(in oklch, var(--destructive) 10%, transparent);
+        color: var(--destructive);
+        transform: translateY(-2px);
     }
     
     &:active {

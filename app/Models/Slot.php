@@ -14,15 +14,16 @@ class Slot extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'zone_id', 'code', 'location', 'max_loa_m', 'max_beam_m', 'max_draft_m', 'shore_power', 'is_active',
+        'zone_id', 'name', 'code', 'length', 'width', 'depth', 'amenities', 'base_rate', 'is_active',
     ];
 
     protected $casts = [
-        'shore_power' => 'boolean',
+        'amenities' => 'array',
         'is_active' => 'boolean',
-        'max_loa_m' => 'float',
-        'max_beam_m' => 'float',
-        'max_draft_m' => 'float',
+        'length' => 'decimal:2',
+        'width' => 'decimal:2',
+        'depth' => 'decimal:2',
+        'base_rate' => 'decimal:2',
     ];
 
     public function zone()

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\Dashboard as AdminDashboard;
+use App\Livewire\Admin\Configuration\Index as ConfigurationIndex;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Client\Dashboard as ClientDashboard;
@@ -23,6 +24,7 @@ Route::post('/logout', [LogoutController::class, '__invoke'])->middleware('auth'
 // Admin routes group
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+    Route::get('/configuration', ConfigurationIndex::class)->name('configuration');
 });
 
 // Client routes group  

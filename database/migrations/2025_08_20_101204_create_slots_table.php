@@ -4,18 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('slots', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('zone_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
             $table->string('code');
-            $table->string('location')->nullable();
-            $table->decimal('max_loa_m', 5, 2)->nullable();
-            $table->decimal('max_beam_m', 5, 2)->nullable();
-            $table->decimal('max_draft_m', 5, 2)->nullable();
-            $table->boolean('shore_power')->default(false);
+            $table->decimal('length', 8, 2)->nullable();
+            $table->decimal('width', 8, 2)->nullable();
+            $table->decimal('depth', 8, 2)->nullable();
+            $table->json('amenities')->nullable();
+            $table->decimal('base_rate', 10, 2)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
@@ -23,6 +28,9 @@ return new class extends Migration {
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('slots');

@@ -9,16 +9,21 @@ class BookingLog extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
-    protected $fillable = ['booking_id','status','notes','created_at'];
+    protected $fillable = [
+        'booking_id', 'user_id', 'action', 'old_status', 'new_status', 'changes', 'notes'
+    ];
 
     protected $casts = [
-        'created_at' => 'datetime',
+        'changes' => 'array',
     ];
 
     public function booking()
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

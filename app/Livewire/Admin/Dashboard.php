@@ -32,13 +32,17 @@ class Dashboard extends Component
 
     private function calculateRevenue(): float
     {
-        // Calculate total revenue from completed bookings/contracts
-        $revenue = DB::table('contracts')
-            ->join('bookings', 'contracts.booking_id', '=', 'bookings.id')
-            ->where('contracts.status', 'active')
-            ->sum('contracts.total');
+        // Calculate total revenue from active contracts and completed bookings
+        $contractRevenue = DB::table('contracts')
+            ->where('status', 'active')
+            ->sum('monthly_rate');
 
-        return round($revenue / 1000, 1); // Convert to thousands
+        $bookingRevenue = DB::table('bookings')
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->sum('total_amount');
+
+        $totalRevenue = $contractRevenue + $bookingRevenue;
+        return round($totalRevenue / 1000, 1); // Convert to thousands
     }
 
     private function loadRecentActivities()

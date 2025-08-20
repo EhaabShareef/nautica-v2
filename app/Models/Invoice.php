@@ -2,28 +2,40 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
-    protected $fillable = ['contract_id','booking_id','invoice_no','status','currency','total','issued_at','due_at'];
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    protected $casts = [
-        'issued_at' => 'datetime',
-        'due_at' => 'datetime',
+    protected $fillable = [
+        'invoice_number', 'user_id', 'invoiceable_type', 'invoiceable_id',
+        'issue_date', 'due_date', 'status', 'subtotal', 'tax_amount', 'total_amount',
+        'billing_details', 'notes'
     ];
 
-    public function contract()
+    protected $casts = [
+        'issue_date' => 'date',
+        'due_date' => 'date',
+        'subtotal' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'billing_details' => 'array',
+    ];
+
+    public function user()
     {
-        return $this->belongsTo(Contract::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function booking()
+    public function invoiceable()
     {
-        return $this->belongsTo(Booking::class);
+        return $this->morphTo();
     }
 
     public function lines()

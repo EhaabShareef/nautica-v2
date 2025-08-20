@@ -3,49 +3,38 @@
 namespace App\Models;
 
 use App\Models\User;
-use App\Support\Dictionary;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'client_id','vessel_id','property_id','block_id','zone_id','slot_id',
-        'start_at','end_at','status','type','priority','hold_expires_at',
-        'notes','admin_notes'
+        'booking_number', 'user_id', 'vessel_id', 'slot_id',
+        'start_date', 'end_date', 'status', 'total_amount',
+        'additional_data', 'notes'
     ];
 
     protected $casts = [
-        'start_at' => 'datetime',
-        'end_at' => 'datetime',
-        'hold_expires_at' => 'datetime',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'total_amount' => 'decimal:2',
+        'additional_data' => 'array',
     ];
 
-    public function client()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsTo(User::class);
     }
 
     public function vessel()
     {
         return $this->belongsTo(Vessel::class);
-    }
-
-    public function property()
-    {
-        return $this->belongsTo(Property::class);
-    }
-
-    public function block()
-    {
-        return $this->belongsTo(Block::class);
-    }
-
-    public function zone()
-    {
-        return $this->belongsTo(Zone::class);
     }
 
     public function slot()
@@ -58,11 +47,8 @@ class Booking extends Model
         return $this->hasMany(BookingLog::class);
     }
 
-    public function setStatusAttribute($value)
+    public function invoices()
     {
-        if (!Dictionary::isValid('booking_status', $value)) {
-            throw new \InvalidArgumentException('Invalid booking status');
-        }
-        $this->attributes['status'] = $value;
+        return $this->morphMany(Invoice::class, 'invoiceable');
     }
 }

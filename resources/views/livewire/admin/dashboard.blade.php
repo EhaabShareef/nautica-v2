@@ -101,6 +101,14 @@
                     <x-heroicon name="chart-bar" class="w-4 h-4" />
                     View Reports
                 </button>
+                <a href="{{ route('admin.configuration') }}" class="btn-secondary" style="font-size: 0.875rem; padding: 0.75rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <x-heroicon name="cog-6-tooth" class="w-4 h-4" />
+                    Configuration
+                </a>
+                <button class="btn-secondary" style="font-size: 0.875rem; padding: 0.75rem;">
+                    <x-heroicon name="document-text" class="w-4 h-4" />
+                    System Logs
+                </button>
             </div>
         </div>
 
