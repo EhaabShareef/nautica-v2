@@ -14,10 +14,26 @@ class Setting extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['key', 'value'];
+    /**
+     * Mass assignable attributes.
+     */
+    protected $fillable = [
+        'key',
+        'group',
+        'value',
+        'label',
+        'description',
+        'is_protected',
+        'is_active',
+    ];
 
+    /**
+     * Attribute casting.
+     */
     protected $casts = [
         // value handled via accessor
+        'is_protected' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -52,5 +68,32 @@ class Setting extends Model
                 return $encoded;
             }
         );
+    }
+
+    /**
+     * Scope: only settings accessible to admins (active ones).
+     */
+    public function scopeAccessible($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope: filter settings by group.
+     */
+    public function scopeByGroup($query, $group)
+    {
+        return $query->where('group', $group);
+    }
+
+    /**
+     * Retrieve a cached setting value.
+     */
+    public static function get($key, $default = null)
+    {
+        return \Cache::remember("setting:{$key}", 3600, function () use ($key, $default) {
+            $setting = static::where('key', $key)->where('is_active', true)->first();
+            return $setting ? $setting->value : $default;
+        });
     }
 }
