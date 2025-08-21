@@ -5,7 +5,7 @@
             <form wire:submit.prevent="save" class="space-y-3">
                 <div>
                     <label class="block text-sm">Key</label>
-                    <input type="text" wire:model="key" class="input w-full" />
+                    <input type="text" wire:model="key" class="input w-full" {{ $editingSetting ? 'readonly' : '' }} />
                     @error('key') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>

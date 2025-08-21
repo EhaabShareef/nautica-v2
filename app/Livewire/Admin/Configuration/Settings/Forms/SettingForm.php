@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Configuration\Settings\Forms;
 
 use App\Models\Setting;
+use App\Services\SettingsService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -97,7 +98,7 @@ class SettingForm extends Component
                 }
 
                 $this->dispatch('setting:saved');
-                Cache::forget("setting:{$this->key}");
+                SettingsService::clearCache($this->key, $this->group);
             });
 
             $this->closeModal();
@@ -123,7 +124,7 @@ class SettingForm extends Component
     {
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatchBrowserEvent('setting-form:closed');
+        $this->dispatch('setting-form:closed', [], to: 'window');
     }
 
     private function resetForm()
@@ -146,7 +147,13 @@ class SettingForm extends Component
         $this->group = $setting->group ?? '';
         $this->label = $setting->label ?? '';
         $this->description = $setting->description ?? '';
-        $this->valueInput = is_string($setting->value) ? $setting->value : json_encode($setting->value, JSON_PRETTY_PRINT);
+        if (is_string($setting->value)) {
+            $this->valueInput = $setting->value;
+        } elseif (is_array($setting->value) || is_object($setting->value)) {
+            $this->valueInput = json_encode($setting->value, JSON_PRETTY_PRINT);
+        } else {
+            $this->valueInput = (string) $setting->value ?? '';
+        }
         $this->is_protected = $setting->is_protected;
         $this->is_active = $setting->is_active;
     }

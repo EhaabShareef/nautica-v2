@@ -31,23 +31,19 @@ class AppTypeForm extends Component
 
     protected function rules(): array
     {
-        $codeRule = 'required|string|max:100';
-        if ($this->editingAppType) {
-            $codeRule .= '|unique:app_types,code,' . $this->editingAppType->id;
-        } else {
-            $codeRule .= '|unique:app_types,code';
-        }
-
-        return [
-            'group' => 'required|string|max:100',
-            'code' => $codeRule,
-            'label' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'sort_order' => 'integer',
-            'extraInput' => 'nullable',
+        // Build base rules without a simple unique:code constraint
+        $rules = [
+            'group'        => 'required|string|max:100',
+            'code'         => 'required|string|max:100',
+            'label'        => 'required|string|max:255',
+            'description'  => 'nullable|string|max:1000',
+            'sort_order'   => 'integer',
+            'extraInput'   => 'nullable',
             'is_protected' => 'boolean',
-            'is_active' => 'boolean',
+            'is_active'    => 'boolean',
         ];
+        // Composite uniqueness (group+code) will be enforced in save()
+        return $rules;
     }
 
     public function create()
@@ -76,7 +72,19 @@ class AppTypeForm extends Component
             $this->authorize('create', AppType::class);
         }
 
+        // Validate base rules first
         $this->validate();
+
+        // Check unique constraint for group + code
+        $query = AppType::where('group', $this->group)
+                        ->where('code',  $this->code);
+        if ($this->editingAppType) {
+            $query->where('id', '!=', $this->editingAppType->id);
+        }
+        if ($query->exists()) {
+            $this->addError('code', 'Code must be unique within this group.');
+            return;
+        }
 
         $extra = $this->parseExtra($this->extraInput);
 
@@ -124,14 +132,14 @@ class AppTypeForm extends Component
         if (json_last_error() === JSON_ERROR_NONE) {
             return $decoded;
         }
-        return $input;
+        return ['raw' => $input];
     }
 
     public function closeModal()
     {
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatchBrowserEvent('apptype-form:closed');
+        $this->dispatch('apptype-form:closed', [], to: 'window');
     }
 
     private function resetForm()

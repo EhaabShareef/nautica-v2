@@ -86,14 +86,4 @@ class Setting extends Model
         return $query->where('group', $group);
     }
 
-    /**
-     * Retrieve a cached setting value.
-     */
-    public static function get($key, $default = null)
-    {
-        return \Cache::remember("setting:{$key}", 3600, function () use ($key, $default) {
-            $setting = static::where('key', $key)->where('is_active', true)->first();
-            return $setting ? $setting->value : $default;
-        });
-    }
 }

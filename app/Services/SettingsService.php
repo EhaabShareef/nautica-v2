@@ -26,12 +26,29 @@ class SettingsService
         });
     }
 
-    public static function clearCache(?string $key = null)
+    public static function clearCache(?string $key = null, ?string $group = null)
     {
         if ($key) {
             Cache::forget("setting:{$key}");
-        } else {
-            Cache::flush();
+        }
+        
+        if ($group) {
+            Cache::forget("settings:group:{$group}");
+        }
+        
+        if (!$key && !$group) {
+            // Clear all settings-related cache entries without using Cache::flush()
+            // Get all known setting keys and groups to clear their caches
+            $settings = Setting::select('key', 'group')->get();
+            
+            foreach ($settings as $setting) {
+                Cache::forget("setting:{$setting->key}");
+            }
+            
+            $groups = $settings->pluck('group')->unique()->filter();
+            foreach ($groups as $groupName) {
+                Cache::forget("settings:group:{$groupName}");
+            }
         }
     }
 }
