@@ -121,4 +121,6 @@
     {{-- Property Forms --}}
     @livewire('admin.configuration.forms.property-form')
     @livewire('admin.configuration.forms.property-delete')
+    @livewire('admin.configuration.forms.block-form')
+    @livewire('admin.configuration.forms.block-delete')
 </div>
