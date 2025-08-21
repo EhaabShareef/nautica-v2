@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Configuration\Forms;
 
 use App\Models\Property;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PropertyForm extends Component
@@ -60,31 +61,54 @@ class PropertyForm extends Component
 
         $this->validate();
 
-        $data = [
-            'name' => $this->name,
-            'code' => $this->code,
-            'timezone' => $this->timezone,
-            'currency' => $this->currency,
-            'address' => $this->address,
-            'is_active' => $this->is_active,
-        ];
+        try {
+            DB::transaction(function () {
+                $data = [
+                    'name' => $this->name,
+                    'code' => $this->code,
+                    'timezone' => $this->timezone,
+                    'currency' => $this->currency,
+                    'address' => $this->address,
+                    'is_active' => $this->is_active,
+                ];
 
-        if ($this->editingProperty) {
-            $this->editingProperty->update($data);
-            session()->flash('message', 'Property updated successfully!');
-        } else {
-            Property::create($data);
-            session()->flash('message', 'Property created successfully!');
+                if ($this->editingProperty) {
+                    $this->editingProperty->update($data);
+                    session()->flash('message', 'Property updated successfully!');
+                } else {
+                    Property::create($data);
+                    session()->flash('message', 'Property created successfully!');
+                }
+
+                $this->dispatch('property:saved');
+            });
+
+            // Close modal only after successful transaction
+            $this->closeModal();
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Property save failed', [
+                'property_id' => $this->editingProperty?->id,
+                'data' => [
+                    'name' => $this->name,
+                    'code' => $this->code,
+                ],
+                'error' => $e->getMessage()
+            ]);
+
+            // Flash error message to user
+            session()->flash('error', 'Failed to save property. Please check your input and try again.');
+
+            // Don't close modal on failure so user can retry
         }
-
-        $this->dispatch('property:saved');
-        $this->closeModal();
     }
 
     public function closeModal()
     {
         $this->showModal = false;
         $this->resetForm();
+        $this->dispatchBrowserEvent('property-form:closed');
     }
 
     protected function resetForm()

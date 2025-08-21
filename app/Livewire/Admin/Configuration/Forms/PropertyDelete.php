@@ -3,8 +3,9 @@
 namespace App\Livewire\Admin\Configuration\Forms;
 
 use App\Models\Property;
-use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class PropertyDelete extends Component
 {
@@ -29,19 +30,39 @@ class PropertyDelete extends Component
     {
         if (!$this->property) return;
 
-        $propertyName = $this->property->name;
-        $this->property->delete();
-
-        session()->flash('message', "Property '{$propertyName}' and all associated data deleted successfully!");
-
-        $this->dispatch('property:deleted');
-        $this->closeModal();
+        try {
+            DB::transaction(function () {
+                $propertyName = $this->property->name;
+                $this->property->delete();
+                
+                // Flash success message and dispatch events within transaction
+                session()->flash('message', "Property '{$propertyName}' and all associated data deleted successfully!");
+                $this->dispatch('property:deleted');
+            });
+            
+            // Close modal only after successful transaction
+            $this->closeModal();
+            
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Property deletion failed', [
+                'property_id' => $this->property->id,
+                'property_name' => $this->property->name,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Flash error message to user
+            session()->flash('error', 'Failed to delete property and associated data. Please try again or contact support if the issue persists.');
+            
+            // Don't close modal or dispatch success events on failure
+        }
     }
 
     public function closeModal()
     {
         $this->showModal = false;
         $this->property = null;
+        $this->dispatchBrowserEvent('property-delete:closed');
     }
 
     public function render()

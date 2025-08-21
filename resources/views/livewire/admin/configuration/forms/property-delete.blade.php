@@ -4,6 +4,7 @@
          x-data
          x-init="$nextTick(() => { document.body.style.overflow='hidden' })"
          x-on:keydown.escape.window="$wire.closeModal()"
+         x-on:property-delete:closed.window="$nextTick(() => { document.body.style.overflow=''; })"
          wire:ignore.self>
         
         {{-- Full-screen backdrop --}}

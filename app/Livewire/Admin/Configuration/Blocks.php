@@ -55,9 +55,10 @@ class Blocks extends Component
         $query = Block::with('property')->withCount('zones');
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('code', 'like', '%' . $this->search . '%');
+            $escapedSearch = addcslashes($this->search, '%_\\');
+            $query->where(function ($q) use ($escapedSearch) {
+                $q->where('name', 'like', '%' . $escapedSearch . '%')
+                  ->orWhere('code', 'like', '%' . $escapedSearch . '%');
             });
         }
 

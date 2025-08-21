@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Configuration\Forms;
 use App\Models\Block;
 use App\Models\Property;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class BlockForm extends Component
@@ -68,30 +69,54 @@ class BlockForm extends Component
     {
         $this->validate();
 
-        $data = [
-            'property_id' => $this->property_id,
-            'name' => $this->name,
-            'code' => $this->code,
-            'location' => $this->location,
-            'is_active' => $this->is_active,
-        ];
+        try {
+            DB::transaction(function () {
+                $data = [
+                    'property_id' => $this->property_id,
+                    'name' => $this->name,
+                    'code' => $this->code,
+                    'location' => $this->location,
+                    'is_active' => $this->is_active,
+                ];
 
-        if ($this->editingBlock) {
-            $this->editingBlock->update($data);
-            session()->flash('message', 'Block updated successfully!');
-        } else {
-            Block::create($data);
-            session()->flash('message', 'Block created successfully!');
+                if ($this->editingBlock) {
+                    $this->editingBlock->update($data);
+                    session()->flash('message', 'Block updated successfully!');
+                } else {
+                    Block::create($data);
+                    session()->flash('message', 'Block created successfully!');
+                }
+
+                $this->dispatch('block:saved');
+            });
+
+            // Close modal only after successful transaction
+            $this->closeModal();
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Block save failed', [
+                'block_id' => $this->editingBlock?->id,
+                'data' => [
+                    'property_id' => $this->property_id,
+                    'name' => $this->name,
+                    'code' => $this->code,
+                ],
+                'error' => $e->getMessage()
+            ]);
+
+            // Flash error message to user
+            session()->flash('error', 'Failed to save block. Please check your input and try again.');
+
+            // Don't close modal on failure so user can retry
         }
-
-        $this->dispatch('block:saved');
-        $this->closeModal();
     }
 
     public function closeModal(): void
     {
         $this->showModal = false;
         $this->resetForm();
+        $this->dispatchBrowserEvent('block-form:closed');
     }
 
     protected function resetForm(): void

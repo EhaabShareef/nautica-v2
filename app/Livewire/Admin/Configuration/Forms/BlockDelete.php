@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Configuration\Forms;
 
 use App\Models\Block;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class BlockDelete extends Component
@@ -32,17 +33,40 @@ class BlockDelete extends Component
         if (!$this->block) {
             return;
         }
-        $name = $this->block->name;
-        $this->block->delete();
-        session()->flash('message', "Block '{$name}' deleted successfully!");
-        $this->dispatch('block:deleted');
-        $this->closeModal();
+
+        try {
+            DB::transaction(function () {
+                $name = $this->block->name;
+                $this->block->delete();
+                
+                // Flash success message and dispatch events within transaction
+                session()->flash('message', "Block '{$name}' deleted successfully!");
+                $this->dispatch('block:deleted');
+            });
+            
+            // Close modal only after successful transaction
+            $this->closeModal();
+            
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Block deletion failed', [
+                'block_id' => $this->block->id,
+                'block_name' => $this->block->name,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Flash error message to user
+            session()->flash('error', 'Failed to delete block. Please try again or contact support if the issue persists.');
+            
+            // Don't close modal or dispatch success events on failure
+        }
     }
 
     public function closeModal(): void
     {
         $this->showModal = false;
         $this->block = null;
+        $this->dispatchBrowserEvent('block-delete:closed');
     }
 
     public function render()

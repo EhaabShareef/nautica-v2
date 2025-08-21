@@ -4,6 +4,7 @@
          x-data
          x-init="$nextTick(() => { document.body.style.overflow='hidden' })"
          x-on:keydown.escape.window="$wire.closeModal()"
+         x-on:block-delete:closed.window="$nextTick(() => { document.body.style.overflow=''; })"
          wire:ignore.self>
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
         <div class="relative w-full max-w-md" style="background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); animation:modal-appear .2s ease-out;">

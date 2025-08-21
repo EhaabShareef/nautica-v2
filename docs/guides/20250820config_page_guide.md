@@ -112,9 +112,48 @@ class EntityForm extends Component
 
     public function save() {
         $this->validate();
-        // Save logic with proper authorization
-        $this->dispatch('entity:saved');
-        $this->closeModal();
+        
+        try {
+            DB::transaction(function () {
+                $data = [
+                    'name' => $this->name,
+                    'code' => $this->code,
+                    // ... other fields
+                ];
+
+                if ($this->editingEntity) {
+                    $this->editingEntity->update($data);
+                    session()->flash('message', 'Entity updated successfully!');
+                } else {
+                    Entity::create($data);
+                    session()->flash('message', 'Entity created successfully!');
+                }
+
+                $this->dispatch('entity:saved');
+            });
+
+            // Close modal only after successful transaction
+            $this->closeModal();
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Entity save failed', [
+                'entity_id' => $this->editingEntity?->id,
+                'data' => $data ?? [],
+                'error' => $e->getMessage()
+            ]);
+
+            // Flash error message to user
+            session()->flash('error', 'Failed to save entity. Please check your input and try again.');
+
+            // Don't close modal on failure so user can retry
+        }
+    }
+
+    public function closeModal() {
+        $this->showModal = false;
+        $this->resetForm(); // or clear entity
+        $this->dispatchBrowserEvent('entity-form:closed');
     }
 }
 ```
@@ -122,6 +161,8 @@ class EntityForm extends Component
 #### 1.3 Delete Components (`Forms/<Entity>Delete.php`)
 **✅ Pattern Structure:**
 ```php
+use Illuminate\Support\Facades\DB;
+
 class EntityDelete extends Component
 {
     use AuthorizesRequests;
@@ -144,12 +185,32 @@ class EntityDelete extends Component
     public function delete() {
         if (!$this->entity) return;
         
-        $entityName = $this->entity->name;
-        $this->entity->delete();
-        
-        session()->flash('message', "Entity '{$entityName}' deleted successfully!");
-        $this->dispatch('entity:deleted');
-        $this->closeModal();
+        try {
+            DB::transaction(function () {
+                $entityName = $this->entity->name;
+                $this->entity->delete();
+                
+                // Flash success message and dispatch events within transaction
+                session()->flash('message', "Entity '{$entityName}' deleted successfully!");
+                $this->dispatch('entity:deleted');
+            });
+            
+            // Close modal only after successful transaction
+            $this->closeModal();
+            
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Entity deletion failed', [
+                'entity_id' => $this->entity->id,
+                'entity_name' => $this->entity->name,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Flash error message to user
+            session()->flash('error', 'Failed to delete entity. Please try again or contact support if the issue persists.');
+            
+            // Don't close modal or dispatch success events on failure
+        }
     }
 }
 ```
@@ -218,6 +279,7 @@ class EntityDelete extends Component
          x-data
          x-init="$nextTick(() => { document.body.style.overflow='hidden' })"
          x-on:keydown.escape.window="$wire.closeModal()"
+         x-on:entity-form:closed.window="$nextTick(() => { document.body.style.overflow=''; })"
          wire:ignore.self>
         
         {{-- Full-screen backdrop --}}
@@ -231,6 +293,8 @@ class EntityDelete extends Component
 @endif
 </div>
 ```
+
+**Modal Scroll Cleanup**: The `x-on:entity-form:closed.window` listener restores body scrolling when the modal closes. Each form type should have its own event name (e.g., `property-form:closed`, `block-form:closed`).
 
 #### 2.3 Index View Integration
 **📁 File**: `resources/views/livewire/admin/configuration/index.blade.php`
@@ -256,14 +320,17 @@ $query = Entity::with(['relationships'])
 
 #### 3.2 Search Implementation
 ```php
-// Consistent search pattern
+// Secure search pattern with escaped wildcards
 if ($this->search) {
-    $query->where(function ($q) {
-        $q->where('name', 'like', '%' . $this->search . '%')
-          ->orWhere('code', 'like', '%' . $this->search . '%');
+    $escapedSearch = addcslashes($this->search, '%_\\');
+    $query->where(function ($q) use ($escapedSearch) {
+        $q->where('name', 'like', '%' . $escapedSearch . '%')
+          ->orWhere('code', 'like', '%' . $escapedSearch . '%');
     });
 }
 ```
+
+**Security Note**: Always escape user input to prevent SQL wildcard injection attacks. The `addcslashes()` function escapes `%`, `_`, and `\` characters that could be abused in LIKE queries.
 
 #### 3.3 Filter Implementation
 ```php
