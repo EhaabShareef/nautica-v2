@@ -123,4 +123,6 @@
     @livewire('admin.configuration.forms.property-delete')
     @livewire('admin.configuration.forms.block-form')
     @livewire('admin.configuration.forms.block-delete')
+    @livewire('admin.configuration.forms.slot-form')
+    @livewire('admin.configuration.forms.slot-delete')
 </div>

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Booking;
+use App\Models\Contract;
 
 class Slot extends Model
 {
@@ -14,7 +16,7 @@ class Slot extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'zone_id', 'name', 'code', 'length', 'width', 'depth', 'amenities', 'base_rate', 'is_active',
+        'zone_id', 'name', 'code', 'location', 'length', 'width', 'depth', 'amenities', 'base_rate', 'is_active',
     ];
 
     protected $casts = [
@@ -29,5 +31,15 @@ class Slot extends Model
     public function zone()
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
     }
 }

@@ -70,6 +70,7 @@ class DemoDataSeeder extends Seeder
             ['zone_id' => $zone->id, 'code' => 'SLOT-001'],
             [
                 'name' => 'Slot 001',
+                'location' => 'Dock 1',
                 'length' => 30.00,
                 'width' => 12.00,
                 'depth' => 8.00,

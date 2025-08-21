@@ -18,7 +18,7 @@ class HierarchyTest extends TestCase
         $property = Property::create(['name' => 'P1', 'code' => 'P1']);
         $block = $property->blocks()->create(['name' => 'B1', 'code' => 'B1']);
         $zone = $block->zones()->create(['name' => 'Z1', 'code' => 'Z1']);
-        $slot = $zone->slots()->create(['code' => 'S1']);
+        $slot = $zone->slots()->create(['code' => 'S1', 'location' => 'Dock 1']);
 
         $this->assertTrue($property->blocks->contains($block));
         $this->assertTrue($block->zones->contains($zone));
