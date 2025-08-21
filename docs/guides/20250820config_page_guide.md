@@ -111,6 +111,13 @@ class EntityForm extends Component
     }
 
     public function save() {
+        // Authorize per action to prevent direct method calls
+        if ($this->editingEntity) {
+            $this->authorize('update', $this->editingEntity);
+        } else {
+            $this->authorize('create', Entity::class);
+        }
+        
         $this->validate();
         
         try {

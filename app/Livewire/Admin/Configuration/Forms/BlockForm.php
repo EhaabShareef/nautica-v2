@@ -67,6 +67,13 @@ class BlockForm extends Component
 
     public function save(): void
     {
+        // Authorize per action to prevent direct method calls
+        if ($this->editingBlock) {
+            $this->authorize('update', $this->editingBlock);
+        } else {
+            $this->authorize('create', Block::class);
+        }
+
         $this->validate();
 
         try {

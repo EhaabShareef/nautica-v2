@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('blocks', function (Blueprint $table) {
-            $table->unique(['property_id', 'code'], 'blocks_property_id_code_unique');
+        Schema::table('slots', function (Blueprint $table) {
+            $table->string('location')->nullable()->after('code');
         });
     }
 
     public function down(): void
     {
-        Schema::table('blocks', function (Blueprint $table) {
-            $table->dropUnique('blocks_property_id_code_unique');
+        Schema::table('slots', function (Blueprint $table) {
+            $table->dropColumn('location');
         });
     }
 };

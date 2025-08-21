@@ -1,0 +1,57 @@
+Prevent race-condition on delete by re-fetching up-to-date state and clearing both single-item and group caches
+
+To avoid a TOCTOU vulnerability where a setting’s is_protected flag could be toggled between confirmation and delete, re-fetch the setting just before authorization. Also invalidate both the individual cache entry and any group cache for that setting’s group.
+
+• Re-fetch the model using its primary key to pick up any changes to is_protected before calling authorize().
+• After deletion, clear the per-key cache via SettingsService::clearCache($key) and the group-level cache with Cache::forget("settings:group:{$group}").
+• Import and use the SettingsService for consistency and to centralize single-key cache clearing.
+
+Recommended diff:
+```
+--- a/app/Livewire/Admin/Configuration/Settings/Forms/SettingDelete.php
++++ b/app/Livewire/Admin/Configuration/Settings/Forms/SettingDelete.php
+@@ -1,5 +1,6 @@
+ <?php
+ namespace App\Livewire\Admin\Configuration\Settings\Forms;
+
++use App\Models\Setting;
+ use Livewire\Component;
+ use Illuminate\Support\Facades\Cache;
++use App\Services\SettingsService;
+
+ class SettingDelete extends Component
+ {
+@@ -32,15 +33,28 @@ class SettingDelete extends Component
+     public function delete()
+     {
+         if (! $this->setting) {
+             return;
+         }
+
+-        $this->authorize('delete', $this->setting);
+-        $key = $this->setting->key;
+-        $this->setting->delete();
+-        Cache::forget("setting:{$key}");
++        // Re-fetch to ensure we have the latest is_protected flag
++        $fresh = Setting::query()->whereKey($this->setting->key)->first();
++        if (! $fresh) {
++            $this->closeModal();
++            return;
++        }
++        $this->authorize('delete', $fresh);
++
++        $key   = $fresh->key;
++        $group = $fresh->group;
++
++        $fresh->delete();
++
++        // Clear caches: single setting and its group
++        SettingsService::clearCache($key);
++        Cache::forget("settings:group:{$group}");
+
+         $this->dispatch('setting:deleted');
+         session()->flash('message', 'Setting deleted successfully!');
+         $this->closeModal();
+     }
+ }
+ ```

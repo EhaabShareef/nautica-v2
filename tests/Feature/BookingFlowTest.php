@@ -23,7 +23,7 @@ class BookingFlowTest extends TestCase
         $property = Property::create(['name' => 'Test', 'code' => 'T1']);
         $block = Block::create(['property_id' => $property->id, 'name' => 'B1', 'code' => 'B1']);
         $zone = Zone::create(['block_id' => $block->id, 'name' => 'Z1', 'code' => 'Z1']);
-        $slot = Slot::create(['zone_id' => $zone->id, 'code' => 'S1']);
+        $slot = Slot::create(['zone_id' => $zone->id, 'code' => 'S1', 'location' => 'Dock 1']);
 
         $start = Carbon::now();
         $end = (clone $start)->addHour();
