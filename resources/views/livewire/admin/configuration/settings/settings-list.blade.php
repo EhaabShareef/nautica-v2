@@ -95,7 +95,7 @@
                                         {{ $setting->group }}
                                     </span>
                                 @else
-                                    <span class="text-gray-400">-</span>
+                                    <span style="color: var(--muted-foreground);">-</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">{{ $setting->label ?? '-' }}</td>
@@ -142,6 +142,74 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    {{-- Mobile Card List --}}
+    <div class="md:hidden space-y-3">
+        @forelse ($settings as $setting)
+            <div class="rounded-2xl border p-4"
+                 style="border-color: var(--border); background: var(--card);"
+                 wire:key="setting-card-{{ $setting->key }}">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="font-mono text-xs" style="color: var(--foreground);">
+                            {{ $setting->key }}
+                        </div>
+                        @if($setting->label)
+                            <div class="text-sm mt-0.5 truncate" style="color: var(--muted-foreground);">
+                                {{ $setting->label }}
+                            </div>
+                        @endif
+                    </div>
+                    @if($setting->is_protected)
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                            Protected
+                        </span>
+                    @endif
+                </div>
+
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-2 mt-3 text-xs">
+                    @if($setting->group)
+                        <div>
+                            <dt class="text-[0.7rem]" style="color: var(--muted-foreground);">Group</dt>
+                            <dd class="mt-0.5">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                      style="background-color: var(--muted); color: var(--muted-foreground);">
+                                    {{ $setting->group }}
+                                </span>
+                            </dd>
+                        </div>
+                    @endif
+                </dl>
+
+                <div class="mt-3 flex items-center justify-end gap-2">
+                    <button
+                        wire:click="edit('{{ $setting->key }}')"
+                        class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg transition-colors"
+                        style="color: var(--primary); background: var(--primary-foreground);"
+                    >
+                        <x-heroicon name="pencil" class="w-3 h-3" />
+                        Edit
+                    </button>
+                    @if(!$setting->is_protected)
+                        <button
+                            wire:click="delete('{{ $setting->key }}')"
+                            class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg transition-colors text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
+                        >
+                            <x-heroicon name="trash" class="w-3 h-3" />
+                            Delete
+                        </button>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="rounded-2xl border p-6 text-center"
+                 style="border-color: var(--border); background: var(--card);">
+                <x-heroicon name="cog-6-tooth" class="w-10 h-10 mx-auto mb-2"
+                            style="color: var(--muted-foreground);" />
+                <p class="text-sm" style="color: var(--muted-foreground);">No settings found</p>
+            </div>
+        @endforelse
     </div>
 
     {{-- Pagination --}}

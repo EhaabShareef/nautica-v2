@@ -17,7 +17,7 @@
         @foreach($permissionGroups as $groupName => $permissions)
             <div class="border rounded-md p-4">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-semibold">{{ $groupName }} <span class="text-sm text-gray-500">({{ collect($permissions)->pluck('id')->intersect($assigned)->count() }} / {{ count($permissions) }})</span></h3>
+                    <h3 class="font-semibold">{{ $groupName }} <span class="text-sm" style="color: var(--muted-foreground);">({{ collect($permissions)->pluck('id')->intersect($assigned)->count() }} / {{ count($permissions) }})</span></h3>
                     <div class="space-x-2">
                         <button type="button" wire:click='grantAll(@js($groupName))' class="btn-secondary text-xs">Grant All</button>
                         <button type="button" wire:click='revokeAll(@js($groupName))' class="btn-secondary text-xs">Revoke All</button>
