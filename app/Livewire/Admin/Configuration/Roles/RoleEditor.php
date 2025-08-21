@@ -43,18 +43,14 @@ class RoleEditor extends Component
 
     public function updatedSearch()
     {
-        $this->resetPageIfApplicable();
+        // Search filter updated
     }
 
     public function updatedGroup()
     {
-        $this->resetPageIfApplicable();
+        // Group filter updated
     }
 
-    protected function resetPageIfApplicable()
-    {
-        // placeholder for pagination resets if needed
-    }
 
     protected function hasChanges()
     {
