@@ -123,4 +123,6 @@
     @livewire('admin.configuration.forms.property-delete')
     @livewire('admin.configuration.forms.block-form')
     @livewire('admin.configuration.forms.block-delete')
+    @livewire('admin.configuration.forms.zone-form')
+    @livewire('admin.configuration.forms.zone-delete')
 </div>
