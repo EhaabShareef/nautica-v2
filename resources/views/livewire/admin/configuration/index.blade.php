@@ -125,4 +125,6 @@
     @livewire('admin.configuration.forms.block-delete')
     @livewire('admin.configuration.forms.slot-form')
     @livewire('admin.configuration.forms.slot-delete')
+    @livewire('admin.configuration.forms.zone-form')
+    @livewire('admin.configuration.forms.zone-delete')
 </div>
