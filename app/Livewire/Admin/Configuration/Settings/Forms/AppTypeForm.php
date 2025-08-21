@@ -31,19 +31,12 @@ class AppTypeForm extends Component
 
     protected function rules(): array
     {
-        // Build base rules without a simple unique:code constraint
-        $rules = [
-            'group'        => 'required|string|max:100',
-            'code'         => 'required|string|max:100',
-            'label'        => 'required|string|max:255',
-            'description'  => 'nullable|string|max:1000',
-            'sort_order'   => 'integer',
-            'extraInput'   => 'nullable',
-            'is_protected' => 'boolean',
-            'is_active'    => 'boolean',
-        ];
-        // Composite uniqueness (group+code) will be enforced in save()
-        return $rules;
+        $baseRules = AppType::getValidationRules($this->editingAppType?->id, $this->group);
+        
+        // Add UI-specific validation for extra input
+        return array_merge($baseRules, [
+            'extraInput' => 'nullable',
+        ]);
     }
 
     public function create()
@@ -72,19 +65,7 @@ class AppTypeForm extends Component
             $this->authorize('create', AppType::class);
         }
 
-        // Validate base rules first
         $this->validate();
-
-        // Check unique constraint for group + code
-        $query = AppType::where('group', $this->group)
-                        ->where('code',  $this->code);
-        if ($this->editingAppType) {
-            $query->where('id', '!=', $this->editingAppType->id);
-        }
-        if ($query->exists()) {
-            $this->addError('code', 'Code must be unique within this group.');
-            return;
-        }
 
         $extra = $this->parseExtra($this->extraInput);
 
@@ -110,7 +91,7 @@ class AppTypeForm extends Component
                 }
 
                 $this->dispatch('apptype:saved');
-                Cache::forget("types:{$this->group}");
+                AppType::clearGroupCache($this->group);
             });
 
             $this->closeModal();

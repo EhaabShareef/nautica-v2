@@ -37,7 +37,7 @@ class AppTypeDelete extends Component
         $this->authorize('delete', $this->appType);
         $group = $this->appType->group;
         $this->appType->delete();
-        Cache::forget("types:{$group}");
+        AppType::clearGroupCache($group);
         $this->dispatch('apptype:deleted');
         session()->flash('message', 'App type deleted successfully!');
         $this->closeModal();
