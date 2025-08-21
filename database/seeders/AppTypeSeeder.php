@@ -77,12 +77,16 @@ class AppTypeSeeder extends Seeder
         ];
 
         foreach ($types as $group => $items) {
+            $sortOrder = 0;
             foreach ($items as $item) {
                 AppType::updateOrCreate(
                     ['group' => $group, 'code' => $item['code']],
                     [
                         'label' => $item['label'],
+                        'description' => $item['description'] ?? null,
+                        'sort_order' => $sortOrder++,
                         'is_active' => true,
+                        'is_protected' => $item['protected'] ?? false,
                     ]
                 );
             }

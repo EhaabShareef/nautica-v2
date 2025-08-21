@@ -1,0 +1,4 @@
+# All files in this deprecated folder are ignored from git
+*
+# But not this .gitignore file
+!.gitignore

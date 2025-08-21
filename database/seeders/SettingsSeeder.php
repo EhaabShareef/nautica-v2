@@ -10,15 +10,57 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            'booking.hold_minutes' => 120,
-            'billing.cycle_day' => 1,
-            'invoice.number_prefix' => 'INV-',
+            [
+                'key' => 'booking.hold_minutes',
+                'group' => 'booking',
+                'value' => 120,
+                'label' => 'Booking Hold Duration',
+                'description' => 'Minutes to hold a booking before expiring',
+                'is_protected' => false,
+                'is_active' => true,
+            ],
+            [
+                'key' => 'billing.cycle_day',
+                'group' => 'billing',
+                'value' => 1,
+                'label' => 'Billing Cycle Day',
+                'description' => 'Day of month for billing cycle',
+                'is_protected' => false,
+                'is_active' => true,
+            ],
+            [
+                'key' => 'invoice.number_prefix',
+                'group' => 'invoice',
+                'value' => 'INV-',
+                'label' => 'Invoice Number Prefix',
+                'description' => 'Prefix for invoice numbers',
+                'is_protected' => true,
+                'is_active' => true,
+            ],
+            [
+                'key' => 'app.name',
+                'group' => 'general',
+                'value' => 'Nautica Marina',
+                'label' => 'Application Name',
+                'description' => 'Name displayed throughout the application',
+                'is_protected' => true,
+                'is_active' => true,
+            ],
+            [
+                'key' => 'app.timezone',
+                'group' => 'general',
+                'value' => 'UTC',
+                'label' => 'Default Timezone',
+                'description' => 'Default timezone for the application',
+                'is_protected' => false,
+                'is_active' => true,
+            ],
         ];
 
-        foreach ($settings as $key => $value) {
+        foreach ($settings as $setting) {
             Setting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value]
+                ['key' => $setting['key']],
+                $setting
             );
         }
     }
