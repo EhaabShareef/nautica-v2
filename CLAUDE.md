@@ -22,6 +22,7 @@ Laravel-based application with Livewire components for configuration management.
 - `SettingForm`: Create/edit settings with proper validation and cache clearing
 - `SettingDelete`: Secure deletion with race condition protection via fresh model fetching
 - `AppTypeForm`: Manage app types with composite uniqueness validation (group+code)
+- `RoleEditor`: Role and permission management interface with clean, pagination-free implementation
 
 ### Key Implementation Details
 - **Caching Strategy**: Targeted cache invalidation for settings (individual keys and groups)
@@ -35,6 +36,7 @@ Laravel-based application with Livewire components for configuration management.
 - Fixed double-encoding issues in JSON handling
 - Improved form validation with composite constraints
 - Added race condition protection for delete operations
+- Cleaned up role management component by removing unused pagination code
 
 ## Development
 - Platform: Windows (win32)
