@@ -67,7 +67,7 @@ class AppTypesList extends Component
 
         $appTypes = $query->orderBy('sort_order')
                          ->orderBy('label')
-                         ->paginate(15);
+                         ->paginate($this->perPage);
 
         $groups = AppType::select('group')
                         ->distinct()

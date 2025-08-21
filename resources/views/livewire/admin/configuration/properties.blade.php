@@ -178,10 +178,6 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        <div class="mt-3">
-            {{ $properties->links() }}
-        </div>
     </div>
 
     {{-- Mobile Card List --}}
