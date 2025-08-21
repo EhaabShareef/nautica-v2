@@ -1,0 +1,208 @@
+Here’s a tight, zero-code **Agent Work Order** to review the two models and implement a single, unified **Settings** page that manages both **Application Settings** and **Configurable Types (AppTypes)**.
+
+---
+
+# Agent Work Order — Unified “Settings” (App Settings + App Types)
+
+## 0) Read & Align
+
+* Read the configuration guides in `docs/guides/` to keep naming, events, and Livewire patterns consistent with Blocks/Zones/Slots.
+* Reuse the **event-driven CRUD + modal** pattern and the same RBAC as other Configuration pages.
+
+---
+
+## 1) Repository Inventory (what to audit first)
+
+* **Models**: `Setting` and `AppType` (fields, casts, primary keys, relationships).
+* **Migrations**: uniqueness and indexes (e.g., `settings.setting_key` unique; `apptypes (group, code)` unique).
+* **Policies**: how admin-only is enforced elsewhere; ensure parity here.
+* **Livewire**: how list/display components are separated from form/delete components.
+* **Views**: shared modal shells, table/card patterns, search/filters.
+* **Helpers/Facades**: any existing helpers like `settings('group.key')` or type helpers; note how the app reads types at runtime.
+
+---
+
+## 2) Consolidation Decision (yes—single page)
+
+* We **will** keep **two models** (different semantics) but expose them on **one Settings page** with two tabs:
+
+  1. **Application Settings** (key/value; app behavior/config)
+  2. **Configurable Types** (a taxonomy system replacing enums: statuses, vehicle types, priorities, etc.)
+* Rationale:
+
+  * **Separation of concerns in data** (system config vs. taxonomies) but **unified admin UX**.
+  * Avoid database enums; **AppTypes** remain the single source of truth for user-defined lists.
+
+---
+
+## 3) Data Model Rules (no schema changes unless gaps found)
+
+* **Setting**
+
+  * PK: `setting_key` (string). Value stored as JSON (cast).
+  * Optional: `group` (string), `label` (string), `description` (text), `is_protected` (bool).
+  * **Uniqueness**: `setting_key` unique (optionally, `group + setting_key` if namespaced).
+* **AppType**
+
+  * PK: UUID (or mirror your existing PK strategy).
+  * Required: `group` (string), `code` (string), `label` (string).
+  * Optional: `description` (text), `extra` (JSON), `sort_order` (int), `is_active` (bool), `is_protected` (bool).
+  * **Uniqueness**: `(group, code)` unique.
+* Add/verify proper **indexes** for frequent lookups:
+
+  * `apptypes` on `(group, is_active, sort_order)` and `(group, code)` unique.
+  * `settings` on `setting_key` (and `group` if used).
+
+---
+
+## 4) Unified Settings Page — IA & Routing
+
+* Route under `/admin/configuration/settings` (Admin-only).
+* Page layout:
+
+  * **Tabs**: “Application Settings” | “Configurable Types”.
+  * Persistent **search** box, per-tab; separate **filters** per tab.
+  * Consistent **flash messaging** and **modals mounted once** at the page level.
+
+---
+
+## 5) Livewire Architecture (no code—just components to create)
+
+**Container**
+
+* `Admin/Configuration/Settings/Index`
+
+  * Hosts both tabs and shared flash area.
+  * Mounts the form/delete modals for both tabs **once** at the bottom.
+
+**Application Settings (Key/Value)**
+
+* Display: `Admin/Configuration/Settings/SettingsList`
+
+  * Responsibilities: list/search/filter/paginate; **dispatch** events only.
+  * Filters: by `group` (dropdown), by `is_protected` (optional), by data type (optional from `value` meta).
+  * Events it dispatches: `setting:create`, `setting:edit`, `setting:delete?` (delete optional).
+  * List columns: Key, Group, Summary of Value (render scalar/array gist), Protected badge, Updated at, Actions.
+* Form modal: `Admin/Configuration/Settings/SettingForm`
+
+  * Owns modal state, validation, authorization, create/update.
+  * Fields: **Group**, **Key**, **Value** (raw JSON editor or dynamic input selector), **Label**, **Description**, **Protected**, **Active?** (if used).
+  * Emits: `setting:saved`.
+* (Optional) Delete modal: `Admin/Configuration/Settings/SettingDelete`
+
+  * Block deletion if `is_protected=true` or if app requires.
+
+**Configurable Types (Taxonomies)**
+
+* Display: `Admin/Configuration/Settings/AppTypesList`
+
+  * Responsibilities: list/search/filter/paginate; **dispatch** events only.
+  * Filters: **Group** (required), Active-only toggle, optional “Show protected”.
+  * Events it dispatches: `apptype:create`, `apptype:edit`, `apptype:delete`.
+  * List columns: Group, Code, Label, Sort, Active, Protected, Actions.
+* Form modal: `Admin/Configuration/Settings/AppTypeForm`
+
+  * Owns modal state, validation, authorization, create/update.
+  * Fields: **Group**, **Code**, **Label**, **Sort order**, **Active**, **Protected**, **Extra (JSON)**.
+  * Enforce uniqueness `(group, code)`; normalize `code` (slug rules) if that’s project convention.
+  * Emits: `apptype:saved`.
+* Delete modal: `Admin/Configuration/Settings/AppTypeDelete`
+
+  * If the type is referenced (e.g., by bookings), either block delete or require deactivation (mirror global policy for referential integrity).
+  * Emits: `apptype:deleted`.
+
+---
+
+## 6) UX Behavior (match configuration pattern)
+
+* **Search**:
+
+  * Settings tab: search `key`, `label`, `description`.
+  * AppTypes tab: search `group`, `code`, `label`.
+* **Filters**:
+
+  * Settings: by `group` (and `is_protected` if surfaced).
+  * AppTypes: **Group** (primary scope), Active-only default = ON.
+* **Tables & Cards**: Use the same desktop table + mobile card pattern used elsewhere.
+* **Actions**: All buttons **dispatch events**; display components do not own modal state.
+* **Validation & Guards**:
+
+  * Settings: unique `setting_key` (or `group:key` if namespaced); validate JSON if value is JSON.
+  * AppTypes: unique `(group, code)`; prevent edits that would break protected records if `is_protected=true`.
+
+---
+
+## 7) Performance & Caching
+
+* Eager-load only what’s needed (AppTypes don’t need relations unless you show counts).
+* Optional `withCount` if showing usage counts (be mindful of cost).
+* Introduce a lightweight **cache** layer:
+
+  * Cache all active AppTypes by group (`types:{group}`).
+  * Cache Settings (`settings:*`) with a tag or version key.
+  * **Bust cache** on create/update/delete (emit events → listener → cache clear).
+
+---
+
+## 8) Backward Compatibility & Refactor Plan
+
+* **Locate all usages** of enums or hard-coded arrays → refactor to query `AppType` by `group`.
+* **Locate all settings reads** → ensure they go through a single `Settings` service/helper (not scattered `config()` or DB hits).
+* Where legacy behaviors conflict, prefer the new unified approach; document exceptions.
+
+---
+
+## 9) RBAC & Auditing
+
+* Enforce **Admin-only** for the unified page (route + policy).
+* For sensitive keys/types, also check `is_protected` and limit destructive actions.
+* (Optional) Add basic change logging (created/updated by, timestamps already exist).
+
+---
+
+## 10) Import/Export (optional but recommended)
+
+* Provide JSON **export/import**:
+
+  * **Settings**: export `{ key, group, value, label, description, is_protected }[]`.
+  * **AppTypes**: export `{ group, code, label, sort_order, is_active, is_protected, extra }[]`.
+* On import, **dry-run** preview with conflicts (duplicate keys or (group, code) collisions) and allow selective apply.
+
+---
+
+## 11) QA — Manual Smoke Checklist
+
+* Non-admin cannot access `/admin/configuration/settings`.
+* **Application Settings** tab:
+
+  * List loads; search and group filter work; pagination resets on interaction.
+  * Create/edit a setting (JSON and scalar values); improper JSON rejected.
+  * Protected setting cannot be deleted (if delete exists) and may have restricted edits.
+  * Cache reflects changes immediately (no stale reads).
+* **Configurable Types** tab:
+
+  * Group filter required and sticky; Active-only default = ON.
+  * Create/edit AppType; `(group, code)` uniqueness enforced.
+  * Deleting a type: obey guard rules (block if referenced or require deactivation).
+  * Cache reflects changes immediately.
+* Responsive UI parity with other configuration lists.
+
+---
+
+## 12) Changelog Update
+
+Append to `docs/CHANGELOG-configuration.md`:
+
+* **Added**: Unified **Settings** page combining **Application Settings** and **Configurable Types** management.
+* **Implemented**: Event-driven CRUD with dedicated form/delete modals, search, filters, pagination, and admin-only access.
+* **Notes**: Established cache strategy for settings and types; documented protections for `is_protected` records; deprecated any legacy enum usage in favor of AppTypes.
+
+---
+
+### Completion Definition
+
+You’re done when:
+
+* A single **Settings** route/page provides two tabs for **Application Settings** and **Configurable Types**.
+* Both tabs follow the event-driven CRUD + modal pattern with RBAC, caching, and consistent UX.
+* All checks in the QA list pass and the changelog is updated.
