@@ -95,10 +95,22 @@ class RoleEditor extends Component
 
     public function apply()
     {
-        $this->role->syncPermissions($this->assigned);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $this->loadRole($this->role->id);
-        $this->dispatch('notify', type: 'success', message: 'Permissions updated');
+        try {
+            $this->role->syncPermissions($this->assigned);
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+            $this->loadRole($this->role->id);
+            $this->dispatch('notify', type: 'success', message: 'Permissions updated');
+        } catch (\Exception $e) {
+            $this->dispatch(
+                'notify',
+                type: 'error',
+                message: 'Failed to update permissions: ' . $e->getMessage()
+            );
+            \Log::error('Permission sync failed', [
+                'role'  => $this->role->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function discard()
