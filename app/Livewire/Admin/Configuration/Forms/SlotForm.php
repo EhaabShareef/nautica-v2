@@ -76,6 +76,13 @@ class SlotForm extends Component
     {
         $this->validate();
 
+        // Authorize per action to prevent direct method calls
+        if ($this->editingSlot) {
+            $this->authorize('update', $this->editingSlot);
+        } else {
+            $this->authorize('create', Slot::class);
+        }
+
         try {
             DB::transaction(function () {
                 $data = [

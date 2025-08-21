@@ -33,19 +33,69 @@ class SlotDelete extends Component
 
     public function delete(): void
     {
-        if (! $this->slot || $this->hasLinkedRecords) {
+        if (! $this->slot) {
             return;
         }
 
         try {
+            // Re-authorize at action time
+            $this->authorize('delete', $this->slot);
+
             DB::transaction(function () {
-                $label = $this->slot->code;
-                $this->slot->delete();
+                // Re-check inside the tx to avoid races
+                $slot = Slot::lockForUpdate()->find($this->slot->id);
+                if (! $slot) {
+                    throw new \RuntimeException('Slot not found.');
+                }
+                
+                // Explicit check for linked records before attempting deletion
+                $bookingCount = $slot->bookings()->count();
+                $contractCount = $slot->contracts()->count();
+                
+                if ($bookingCount > 0 || $contractCount > 0) {
+                    $this->hasLinkedRecords = true;
+                    
+                    $messages = [];
+                    if ($bookingCount > 0) {
+                        $messages[] = "{$bookingCount} booking" . ($bookingCount > 1 ? 's' : '');
+                    }
+                    if ($contractCount > 0) {
+                        $messages[] = "{$contractCount} contract" . ($contractCount > 1 ? 's' : '');
+                    }
+                    
+                    throw new \RuntimeException(
+                        "Cannot delete slot '{$slot->code}' because it has " . implode(' and ', $messages) . '. Please remove or reassign these records first.'
+                    );
+                }
+
+                $label = $slot->code;
+                $slot->delete();
 
                 session()->flash('message', "Slot '{$label}' deleted successfully!");
                 $this->dispatch('slot:deleted');
             });
 
+            $this->closeModal();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle DB foreign key constraint violations
+            if (str_contains($e->getMessage(), 'foreign key constraint fails')) {
+                \Log::warning('Slot deletion blocked by foreign key constraint', [
+                    'slot_id' => $this->slot->id,
+                    'slot_code' => $this->slot->code,
+                    'error' => $e->getMessage(),
+                ]);
+                
+                session()->flash('error', "Cannot delete slot '{$this->slot->code}' because it has associated bookings or contracts. Please remove or reassign these records first.");
+            } else {
+                // Handle other database errors
+                \Log::error('Database error during slot deletion', [
+                    'slot_id' => $this->slot->id,
+                    'error' => $e->getMessage(),
+                ]);
+                
+                session()->flash('error', 'Database error occurred while deleting slot. Please try again or contact support.');
+            }
+            
             $this->closeModal();
         } catch (\Exception $e) {
             \Log::error('Slot deletion failed', [
@@ -53,7 +103,14 @@ class SlotDelete extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            session()->flash('error', 'Failed to delete slot. Please try again or contact support if the issue persists.');
+            // Check if it's our custom validation message
+            if (str_contains($e->getMessage(), 'Cannot delete slot')) {
+                session()->flash('error', $e->getMessage());
+            } else {
+                session()->flash('error', 'Failed to delete slot. Please try again or contact support if the issue persists.');
+            }
+            
+            $this->closeModal();
         }
     }
 
