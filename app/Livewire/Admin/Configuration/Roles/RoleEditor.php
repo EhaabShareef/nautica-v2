@@ -25,10 +25,15 @@ class RoleEditor extends Component
 
     public function loadRole($roleId)
     {
-        $this->role = Role::findOrFail($roleId);
-        $this->assigned = $this->role->permissions->pluck('id')->toArray();
-        $this->original = $this->assigned;
-        $this->dirty = false;
+        try {
+            $this->role = Role::findOrFail($roleId);
+            $this->assigned = $this->role->permissions->pluck('id')->toArray();
+            $this->original = $this->assigned;
+            $this->dirty = false;
+        } catch (\Exception $e) {
+            $this->dispatch('notify', type: 'error', message: 'Failed to load role: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function updatedAssigned()
