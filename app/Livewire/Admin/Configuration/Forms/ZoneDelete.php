@@ -69,7 +69,7 @@ class ZoneDelete extends Component
     {
         $this->showModal = false;
         $this->zone = null;
-        $this->dispatchBrowserEvent('zone-delete:closed');
+        $this->dispatch('zone-delete:closed');
     }
 
     public function render()

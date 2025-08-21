@@ -119,7 +119,7 @@ class SlotDelete extends Component
         $this->showModal = false;
         $this->slot = null;
         $this->hasLinkedRecords = false;
-        $this->dispatchBrowserEvent('slot-delete:closed');
+        $this->dispatch('slot-delete:closed');
     }
 
     public function render()

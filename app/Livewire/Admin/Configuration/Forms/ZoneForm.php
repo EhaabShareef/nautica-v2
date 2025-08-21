@@ -29,20 +29,7 @@ class ZoneForm extends Component
 
     protected function rules(): array
     {
-        $uniqueRule = Rule::unique('zones', 'code')
-            ->where(fn($q) => $q->where('block_id', $this->block_id));
-
-        if ($this->editingZone) {
-            $uniqueRule->ignore($this->editingZone->id);
-        }
-
-        return [
-            'block_id' => 'required|exists:blocks,id',
-            'name' => 'required|string|max:255',
-            'code' => ['required', 'string', 'max:50', $uniqueRule],
-            'location' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-        ];
+        return Zone::getValidationRules($this->editingZone?->id, $this->block_id);
     }
 
     public function create(): void
@@ -122,7 +109,7 @@ class ZoneForm extends Component
     {
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatchBrowserEvent('zone-form:closed');
+        $this->dispatch('zone-form:closed');
     }
 
     protected function resetForm(): void

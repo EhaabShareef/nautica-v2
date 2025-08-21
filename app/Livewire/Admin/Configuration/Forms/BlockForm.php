@@ -28,18 +28,7 @@ class BlockForm extends Component
 
     protected function rules(): array
     {
-        $uniqueRule = 'unique:blocks,code';
-        if ($this->editingBlock) {
-            $uniqueRule = 'unique:blocks,code,' . $this->editingBlock->id;
-        }
-
-        return [
-            'property_id' => 'required|exists:properties,id',
-            'name' => 'required|string|max:255',
-            'code' => ['required', 'string', 'max:50', $uniqueRule],
-            'location' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-        ];
+        return Block::getValidationRules($this->editingBlock?->id, $this->property_id);
     }
 
     public function create(): void
@@ -123,7 +112,7 @@ class BlockForm extends Component
     {
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatchBrowserEvent('block-form:closed');
+        $this->dispatch('block-form:closed');
     }
 
     protected function resetForm(): void

@@ -66,7 +66,7 @@ class BlockDelete extends Component
     {
         $this->showModal = false;
         $this->block = null;
-        $this->dispatchBrowserEvent('block-delete:closed');
+        $this->dispatch('block-delete:closed');
     }
 
     public function render()

@@ -62,7 +62,7 @@ class PropertyDelete extends Component
     {
         $this->showModal = false;
         $this->property = null;
-        $this->dispatchBrowserEvent('property-delete:closed');
+        $this->dispatch('property-delete:closed');
     }
 
     public function render()
