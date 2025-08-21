@@ -13,13 +13,29 @@ class SettingsList extends Component
     public string $search = '';
     public string $groupFilter = '';
     public bool $showProtected = false;
+    public int $perPage = 15;
 
     protected $listeners = [
         'setting:saved' => '$refresh',
         'setting:deleted' => '$refresh',
     ];
 
-    public function updatingSearch()
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedGroupFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShowProtected()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
     {
         $this->resetPage();
     }
@@ -63,16 +79,18 @@ class SettingsList extends Component
         $settings = $query->where('is_active', true)
                          ->orderBy('group')
                          ->orderBy('key')
-                         ->paginate(15);
+                         ->paginate($this->perPage);
 
         $groups = Setting::select('group')
                         ->whereNotNull('group')
                         ->distinct()
+                        ->orderBy('group')
                         ->pluck('group');
 
         return view('livewire.admin.configuration.settings.settings-list', [
             'settings' => $settings,
             'groups' => $groups,
+            'perPageOptions' => [10, 15, 25, 50, 100]
         ]);
     }
 }

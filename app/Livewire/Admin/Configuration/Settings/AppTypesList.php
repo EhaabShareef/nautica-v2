@@ -14,6 +14,7 @@ class AppTypesList extends Component
     public string $groupFilter = '';
     public bool $showInactive = false;
     public bool $showProtected = false;
+    public int $perPage = 15;
 
     protected $listeners = [
         'apptype:saved' => '$refresh',
@@ -39,6 +40,31 @@ class AppTypesList extends Component
     public function delete($appTypeId)
     {
         $this->dispatch('apptype:delete', $appTypeId);
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedGroupFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShowInactive()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShowProtected()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
     }
 
     public function render()
@@ -67,7 +93,7 @@ class AppTypesList extends Component
 
         $appTypes = $query->orderBy('sort_order')
                          ->orderBy('label')
-                         ->paginate(15);
+                         ->paginate($this->perPage);
 
         $groups = AppType::select('group')
                         ->distinct()
@@ -77,6 +103,7 @@ class AppTypesList extends Component
         return view('livewire.admin.configuration.settings.app-types-list', [
             'appTypes' => $appTypes,
             'groups' => $groups,
+            'perPageOptions' => [10, 15, 25, 50, 100]
         ]);
     }
 }
