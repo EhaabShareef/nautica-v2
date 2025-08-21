@@ -2,6 +2,7 @@
 
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Configuration\Index as ConfigurationIndex;
+use App\Livewire\Admin\Configuration\Roles\Index as RolesIndex;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Client\Dashboard as ClientDashboard;
@@ -26,6 +27,7 @@ Route::post('/logout', [LogoutController::class, '__invoke'])->middleware('auth'
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
     Route::get('/configuration', ConfigurationIndex::class)->name('configuration');
+    Route::get('/configuration/roles', RolesIndex::class)->name('configuration.roles');
     Route::get('/configuration/settings', [SettingsController::class, 'index'])->name('configuration.settings');
 });
 
