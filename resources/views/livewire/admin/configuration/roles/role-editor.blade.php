@@ -19,8 +19,8 @@
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-semibold">{{ $groupName }} <span class="text-sm text-gray-500">({{ collect($permissions)->pluck('id')->intersect($assigned)->count() }} / {{ count($permissions) }})</span></h3>
                     <div class="space-x-2">
-                        <button type="button" wire:click="grantAll('{{ $groupName }}')" class="btn-secondary text-xs">Grant All</button>
-                        <button type="button" wire:click="revokeAll('{{ $groupName }}')" class="btn-secondary text-xs">Revoke All</button>
+                        <button type="button" wire:click='grantAll(@js($groupName))' class="btn-secondary text-xs">Grant All</button>
+                        <button type="button" wire:click='revokeAll(@js($groupName))' class="btn-secondary text-xs">Revoke All</button>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
