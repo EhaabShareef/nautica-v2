@@ -34,6 +34,11 @@ class ZoneDelete extends Component
         if (!$this->zone) {
             return;
         }
+        // Re-assert authorization in case delete() is invoked directly.
+        $this->authorize('delete', $this->zone);
+
+        // ...existing deletion logic...
+    }
 
         if ($this->zone->slots()->exists()) {
             session()->flash('error', "Cannot delete zone '{$this->zone->name}' because it has associated slots.");
