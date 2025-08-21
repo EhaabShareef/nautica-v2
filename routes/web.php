@@ -8,6 +8,7 @@ use App\Livewire\Client\Dashboard as ClientDashboard;
 use App\Livewire\LandingPage;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Admin\Configuration\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', LandingPage::class)->name('home');
@@ -25,6 +26,7 @@ Route::post('/logout', [LogoutController::class, '__invoke'])->middleware('auth'
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
     Route::get('/configuration', ConfigurationIndex::class)->name('configuration');
+    Route::get('/configuration/settings', [SettingsController::class, 'index'])->name('configuration.settings');
 });
 
 // Client routes group  
