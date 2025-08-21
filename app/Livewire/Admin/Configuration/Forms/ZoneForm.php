@@ -72,6 +72,13 @@ class ZoneForm extends Component
 
     public function save(): void
     {
+        // Authorize per action to prevent direct method calls
+        if ($this->editingZone) {
+            $this->authorize('update', $this->editingZone);
+        } else {
+            $this->authorize('create', Zone::class);
+        }
+
         $this->validate();
 
         try {

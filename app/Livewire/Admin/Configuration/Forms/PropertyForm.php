@@ -55,8 +55,12 @@ class PropertyForm extends Component
 
     public function save()
     {
+        // Authorize per action to prevent direct method calls
         if ($this->editingProperty) {
+            $this->authorize('update', $this->editingProperty);
             $this->rules['code'] = 'required|string|max:50|unique:properties,code,' . $this->editingProperty->id;
+        } else {
+            $this->authorize('create', Property::class);
         }
 
         $this->validate();
