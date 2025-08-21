@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 
 class Zone extends Model
 {
@@ -29,5 +30,30 @@ class Zone extends Model
     public function slots()
     {
         return $this->hasMany(Slot::class);
+    }
+
+    /**
+     * Get validation rules for zone with scoped uniqueness
+     */
+    public static function getValidationRules(?string $zoneId = null, ?string $blockId = null): array
+    {
+        $codeRule = Rule::unique('zones', 'code');
+        
+        if ($zoneId) {
+            $codeRule->ignore($zoneId);
+        }
+        
+        if ($blockId) {
+            $codeRule->where('block_id', $blockId);
+        }
+
+        return [
+            'block_id' => 'required|exists:blocks,id',
+            'name' => 'required|string|max:255',
+            'code' => ['required', 'string', 'max:50', $codeRule],
+            'location' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'is_active' => 'boolean',
+        ];
     }
 }

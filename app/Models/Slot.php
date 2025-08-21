@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use App\Models\Booking;
 use App\Models\Contract;
 
@@ -41,5 +42,34 @@ class Slot extends Model
     public function contracts()
     {
         return $this->hasMany(Contract::class);
+    }
+
+    /**
+     * Get validation rules for slot with scoped uniqueness
+     */
+    public static function getValidationRules(?string $slotId = null, ?string $zoneId = null): array
+    {
+        $codeRule = Rule::unique('slots', 'code');
+        
+        if ($slotId) {
+            $codeRule->ignore($slotId);
+        }
+        
+        if ($zoneId) {
+            $codeRule->where('zone_id', $zoneId);
+        }
+
+        return [
+            'zone_id' => 'required|exists:zones,id',
+            'name' => 'required|string|max:255',
+            'code' => ['required', 'string', 'max:50', $codeRule],
+            'location' => 'required|string|max:255',
+            'length' => 'nullable|numeric|min:0|max:999.99',
+            'width' => 'nullable|numeric|min:0|max:999.99',
+            'depth' => 'nullable|numeric|min:0|max:999.99',
+            'amenities' => 'nullable|array',
+            'base_rate' => 'nullable|numeric|min:0|max:99999999.99',
+            'is_active' => 'boolean',
+        ];
     }
 }

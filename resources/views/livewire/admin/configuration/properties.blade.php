@@ -40,6 +40,17 @@
                 <span class="whitespace-nowrap">{{ $showInactive ? 'Show Inactive' : 'Show Active' }}</span>
             </button>
 
+            {{-- Per Page Selector --}}
+            <select 
+                wire:model.live="perPage"
+                class="form-select h-10 text-sm px-3 py-2 rounded-xl border"
+                style="background-color: var(--card); border-color: var(--border);"
+            >
+                @foreach($perPageOptions as $option)
+                    <option value="{{ $option }}">{{ $option }} per page</option>
+                @endforeach
+            </select>
+
             {{-- Add Property Button --}}
             <button
                 wire:click="create"

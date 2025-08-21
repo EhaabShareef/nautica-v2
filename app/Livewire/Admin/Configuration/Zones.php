@@ -57,8 +57,11 @@ class Zones extends Component
 
     public function render()
     {
-        $query = Zone::with('block.property');
+        $query = Zone::query()
+            ->with('block.property:id,name,code')
+            ->withCount('slots');
 
+        // Apply search filter with debounced input
         if ($this->search) {
             $escapedSearch = addcslashes($this->search, '%_\\');
             $query->where(function ($q) use ($escapedSearch) {
@@ -68,14 +71,12 @@ class Zones extends Component
             });
         }
 
-        if ($this->showInactive) {
-            $query->where('is_active', false);
-        } else {
-            $query->where('is_active', true);
-        }
+        // Apply active/inactive filter
+        $query->where('is_active', $this->showInactive ? false : true);
 
         return view('livewire.admin.configuration.zones', [
             'zones' => $query->paginate($this->perPage),
+            'perPageOptions' => [5, 10, 25, 50, 100]
         ]);
     }
 }

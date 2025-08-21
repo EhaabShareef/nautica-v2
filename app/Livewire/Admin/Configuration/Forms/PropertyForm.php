@@ -23,14 +23,10 @@ class PropertyForm extends Component
         'property:edit' => 'edit'
     ];
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'code' => 'required|string|max:50|unique:properties,code',
-        'timezone' => 'nullable|string|max:100',
-        'currency' => 'nullable|string|max:3',
-        'address' => 'nullable|string',
-        'is_active' => 'boolean',
-    ];
+    protected function rules(): array
+    {
+        return Property::getValidationRules($this->editingProperty?->id);
+    }
 
     public function create()
     {
@@ -58,7 +54,6 @@ class PropertyForm extends Component
         // Authorize per action to prevent direct method calls
         if ($this->editingProperty) {
             $this->authorize('update', $this->editingProperty);
-            $this->rules['code'] = 'required|string|max:50|unique:properties,code,' . $this->editingProperty->id;
         } else {
             $this->authorize('create', Property::class);
         }
@@ -112,7 +107,7 @@ class PropertyForm extends Component
     {
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatchBrowserEvent('property-form:closed');
+        $this->dispatch('property-form:closed');
     }
 
     protected function resetForm()

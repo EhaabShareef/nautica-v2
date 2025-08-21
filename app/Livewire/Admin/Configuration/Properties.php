@@ -12,6 +12,7 @@ class Properties extends Component
 
     public $search = '';
     public $showInactive = false;
+    public $perPage = 10;
 
     protected $listeners = [
         'property:saved' => '$refresh',
@@ -43,6 +44,11 @@ class Properties extends Component
         $this->resetPage();
     }
 
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
     public function toggleInactiveFilter()
     {
         $this->showInactive = !$this->showInactive;
@@ -51,9 +57,17 @@ class Properties extends Component
 
     public function render()
     {
-        $query = Property::with(['blocks', 'blocks.zones', 'blocks.zones.slots']);
+        $query = Property::query()
+            ->withCount(['blocks'])
+            ->withCount(['blocks as zones_count' => function ($query) {
+                $query->join('zones', 'blocks.id', '=', 'zones.block_id');
+            }])
+            ->withCount(['blocks as slots_count' => function ($query) {
+                $query->join('zones', 'blocks.id', '=', 'zones.block_id')
+                      ->join('slots', 'zones.id', '=', 'slots.zone_id');
+            }]);
 
-        // Apply search filter
+        // Apply search filter with debounced input
         if ($this->search) {
             $escapedSearch = addcslashes($this->search, '%_\\');
             $query->where(function ($q) use ($escapedSearch) {
@@ -63,26 +77,11 @@ class Properties extends Component
         }
 
         // Apply active/inactive filter
-        if ($this->showInactive) {
-            $query->where('is_active', false);
-        } else {
-            $query->where('is_active', true);
-        }
-
-        // Add counts for zones and slots
-        $query->withCount([
-            'blocks',
-            'blocks as zones_count' => function ($query) {
-                $query->join('zones', 'blocks.id', '=', 'zones.block_id');
-            },
-            'blocks as slots_count' => function ($query) {
-                $query->join('zones', 'blocks.id', '=', 'zones.block_id')
-                      ->join('slots', 'zones.id', '=', 'slots.zone_id');
-            }
-        ]);
+        $query->where('is_active', $this->showInactive ? false : true);
 
         return view('livewire.admin.configuration.properties', [
-            'properties' => $query->paginate(10)
+            'properties' => $query->paginate($this->perPage),
+            'perPageOptions' => [5, 10, 25, 50, 100]
         ]);
     }
 }

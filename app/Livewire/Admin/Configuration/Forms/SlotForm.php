@@ -32,19 +32,13 @@ class SlotForm extends Component
 
     protected function rules(): array
     {
-        $uniqueRule = Rule::unique('slots', 'code')->where(fn ($q) => $q->where('zone_id', $this->zone_id));
-        if ($this->editingSlot) {
-            $uniqueRule->ignore($this->editingSlot->id);
-        }
-
-        return [
+        $baseRules = Slot::getValidationRules($this->editingSlot?->id, $this->zone_id);
+        
+        // Add additional validation for hierarchical selectors
+        return array_merge($baseRules, [
             'property_id' => 'required|exists:properties,id',
             'block_id' => 'required|exists:blocks,id',
-            'zone_id' => 'required|exists:zones,id',
-            'code' => ['required', 'string', 'max:50', $uniqueRule],
-            'location' => 'required|string|max:255',
-            'is_active' => 'boolean',
-        ];
+        ]);
     }
 
     public function create(): void
@@ -118,7 +112,7 @@ class SlotForm extends Component
     {
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatchBrowserEvent('slot-form:closed');
+        $this->dispatch('slot-form:closed');
     }
 
     protected function resetForm(): void

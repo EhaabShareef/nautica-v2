@@ -13,6 +13,7 @@ class Blocks extends Component
 
     public $search = '';
     public $showInactive = false;
+    public $perPage = 10;
 
     protected $listeners = [
         'block:saved' => '$refresh',
@@ -44,6 +45,11 @@ class Blocks extends Component
         $this->resetPage();
     }
 
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
     public function toggleInactiveFilter()
     {
         $this->showInactive = !$this->showInactive;
@@ -52,8 +58,11 @@ class Blocks extends Component
 
     public function render()
     {
-        $query = Block::with('property')->withCount('zones');
+        $query = Block::query()
+            ->with('property:id,name,code')
+            ->withCount('zones');
 
+        // Apply search filter with debounced input
         if ($this->search) {
             $escapedSearch = addcslashes($this->search, '%_\\');
             $query->where(function ($q) use ($escapedSearch) {
@@ -62,15 +71,13 @@ class Blocks extends Component
             });
         }
 
-        if ($this->showInactive) {
-            $query->where('is_active', false);
-        } else {
-            $query->where('is_active', true);
-        }
+        // Apply active/inactive filter
+        $query->where('is_active', $this->showInactive ? false : true);
 
         return view('livewire.admin.configuration.blocks', [
-            'blocks' => $query->paginate(10),
-            'properties' => Property::where('is_active', true)->get(),
+            'blocks' => $query->paginate($this->perPage),
+            'properties' => Property::where('is_active', true)->select('id', 'name', 'code')->get(),
+            'perPageOptions' => [5, 10, 25, 50, 100]
         ]);
     }
 }

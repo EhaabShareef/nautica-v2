@@ -115,15 +115,17 @@ class Slots extends Component
 
         $slots = $query->orderBy('code')->paginate($this->perPage);
 
-        $properties = Property::where('is_active', true)->get();
-        $blocks = $this->property_id ? Block::where('property_id', $this->property_id)->where('is_active', true)->get() : collect();
-        $zones = $this->block_id ? Zone::where('block_id', $this->block_id)->where('is_active', true)->get() : collect();
+        // Optimize related model queries
+        $properties = Property::where('is_active', true)->select('id', 'name', 'code')->get();
+        $blocks = $this->property_id ? Block::where('property_id', $this->property_id)->where('is_active', true)->select('id', 'name', 'code')->get() : collect();
+        $zones = $this->block_id ? Zone::where('block_id', $this->block_id)->where('is_active', true)->select('id', 'name', 'code')->get() : collect();
 
         return view('livewire.admin.configuration.slots', [
             'slots' => $slots,
             'properties' => $properties,
             'blocks' => $blocks,
             'zones' => $zones,
+            'perPageOptions' => [5, 10, 25, 50, 100]
         ]);
     }
 }
