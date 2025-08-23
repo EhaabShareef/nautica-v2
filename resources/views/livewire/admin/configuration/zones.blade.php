@@ -18,7 +18,7 @@
                 <div class="w-2 h-2 rounded-full {{ $showInactive ? 'bg-orange-500' : 'bg-green-500' }}"></div>
                 <span class="whitespace-nowrap">{{ $showInactive ? 'Show Inactive' : 'Show Active' }}</span>
             </button>
-            <select wire:model="perPage" class="form-input w-24 h-10 text-sm">
+            <select wire:model="perPage" class="form-select h-10 text-sm px-3 py-2 rounded-xl border" style="background-color: var(--card); border-color: var(--border);">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
