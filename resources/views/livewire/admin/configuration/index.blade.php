@@ -17,60 +17,6 @@
             </a>
         </div>
 
-        {{-- System Overview Stats --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-6">
-            {{-- Total Properties --}}
-            <div class="bg-blue-500/10 dark:bg-blue-500/10 rounded-xl p-4 border border-blue-300/30 dark:border-blue-500/20">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-blue-500 rounded-lg">
-                        <x-heroicon name="building-office-2" class="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $stats['total_properties'] }}</p>
-                        <p class="text-xs font-medium text-blue-600 dark:text-blue-400">Total Properties</p>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Active Properties --}}
-            <div class="bg-green-500/10 dark:bg-green-500/10 rounded-xl p-4 border border-green-300/30 dark:border-green-500/20">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-green-500 rounded-lg">
-                        <x-heroicon name="check-circle" class="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ $stats['active_properties'] }}</p>
-                        <p class="text-xs font-medium text-green-600 dark:text-green-400">Active Properties</p>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Active Slots --}}
-            <div class="bg-purple-500/10 dark:bg-purple-500/10 rounded-xl p-4 border border-purple-300/30 dark:border-purple-500/20">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-purple-500 rounded-lg">
-                        <x-heroicon name="squares-2x2" class="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-purple-700 dark:text-purple-300">{{ $stats['active_slots'] }}</p>
-                        <p class="text-xs font-medium text-purple-600 dark:text-purple-400">Active Slots</p>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Last Updated --}}
-            <div class="bg-orange-500/10 dark:bg-orange-500/10 rounded-xl p-4 border border-orange-300/30 dark:border-orange-500/20">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-orange-500 rounded-lg">
-                        <x-heroicon name="clock" class="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-orange-700 dark:text-orange-300 truncate">{{ $stats['last_updated'] }}</p>
-                        <p class="text-xs font-medium text-orange-600 dark:text-orange-400">Last Updated</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
 
