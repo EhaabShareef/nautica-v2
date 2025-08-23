@@ -108,6 +108,10 @@ class RoleEditor extends Component
 
     public function grantAll(string $group): void
     {
+        // Pre-check once outside of the query builder (no $q in scope here)
+        $permissionModel = new Permission();
+        $hasIsActive = Schema::hasColumn($permissionModel->getTable(), 'is_active');
+
         $ids = Permission::query()
             ->where('guard_name', $this->guard)
             ->when($group === 'Ungrouped', function ($q) {
@@ -115,11 +119,19 @@ class RoleEditor extends Component
             }, function ($q) use ($group) {
                 $q->where('name', 'like', $group . '.%');
             })
+            ->when($this->search !== '', function ($q) {
+                $escaped = addcslashes($this->search, '%_\\');
+                $q->where('name', 'like', '%' . $escaped . '%');
+            })
+            ->when($this->onlyActive && $hasIsActive, function ($q) {
+                $q->where('is_active', true);
+            })
             ->pluck('id')
+            ->map('intval')
             ->all();
 
         foreach ($ids as $id) {
-            if (!in_array($id, $this->assignedIds) && !in_array($id, $this->pendingAssign)) {
+            if (!in_array($id, $this->assignedIds, true) && !in_array($id, $this->pendingAssign, true)) {
                 $this->pendingAssign[] = $id;
             }
             $this->pendingRevoke = array_values(array_diff($this->pendingRevoke, [$id]));
@@ -128,15 +140,26 @@ class RoleEditor extends Component
 
     public function revokeAll(string $group): void
     {
-        $ids = Permission::query()
+        $query = Permission::query()
             ->where('guard_name', $this->guard)
             ->when($group === 'Ungrouped', function ($q) {
                 $q->whereRaw("name NOT LIKE '%.%'");
             }, function ($q) use ($group) {
                 $q->where('name', 'like', $group . '.%');
-            })
-            ->pluck('id')
-            ->all();
+            });
+
+        // Apply search filter
+        if ($this->search !== '') {
+            $escaped = addcslashes($this->search, '%_\\');
+            $query->where('name', 'like', '%' . $escaped . '%');
+        }
+
+        // Apply active filter
+        if ($this->onlyActive && Schema::hasColumn($query->getModel()->getTable(), 'is_active')) {
+            $query->where('is_active', true);
+        }
+
+        $ids = $query->pluck('id')->all();
 
         foreach ($ids as $id) {
             if (in_array($id, $this->assignedIds) && !in_array($id, $this->pendingRevoke)) {
@@ -246,4 +269,3 @@ class RoleEditor extends Component
         $this->renderNonce++;
     }
 }
-
