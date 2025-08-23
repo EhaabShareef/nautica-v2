@@ -1,61 +1,42 @@
 {{-- Client Form Modal --}}
 <div>
     @if($showModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            {{-- Background overlay --}}
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
-                     wire:click="closeModal"
-                     x-data="{ show: @entangle('showModal') }"
-                     x-show="show"
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0"
-                     x-transition:enter-end="opacity-100"
-                     x-transition:leave="ease-in duration-200"
-                     x-transition:leave-start="opacity-100"
-                     x-transition:leave-end="opacity-0">
-                </div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+             x-data
+             x-init="$nextTick(() => { document.body.style.overflow='hidden' })"
+             x-on:keydown.escape.window="$wire.closeModal()"
+             x-on:client-form:closed.window="$nextTick(() => { document.body.style.overflow=''; })"
+             wire:ignore.self role="dialog" aria-modal="true">
 
-                {{-- This element is to trick the browser into centering the modal contents --}}
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            {{-- Full-screen backdrop --}}
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal" style="backdrop-filter: blur(8px);"></div>
 
-                {{-- Modal panel --}}
-                <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-                     x-data="{ show: @entangle('showModal') }"
-                     x-show="show"
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            {{-- Modal panel --}}
+            <div class="relative w-full max-w-lg transform transition-all duration-200"
+                 style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: modal-appear 0.2s ease-out;">
                     
                     {{-- Modal Header --}}
-                    <div class="bg-white dark:bg-gray-800 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-                                    <x-heroicon name="{{ $isEditing ? 'pencil' : 'user-plus' }}" class="w-5 h-5 text-white" />
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {{ $isEditing ? 'Edit Client' : 'Add New Client' }}
-                                    </h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $isEditing ? 'Update client information' : 'Create a new client account' }}
-                                    </p>
-                                </div>
+                    <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color: var(--border);">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+                                <x-heroicon name="{{ $isEditing ? 'pencil' : 'user-plus' }}" class="w-5 h-5 text-white" />
                             </div>
-                            <button type="button" 
-                                    wire:click="closeModal"
-                                    class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
-                                <x-heroicon name="x-mark" class="w-6 h-6" />
-                            </button>
+                            <div>
+                                <h3 class="text-lg font-semibold" style="color: var(--foreground);">
+                                    {{ $isEditing ? 'Edit Client' : 'Add New Client' }}
+                                </h3>
+                                <p class="text-sm" style="color: var(--muted-foreground);">
+                                    {{ $isEditing ? 'Update client information' : 'Create a new client account' }}
+                                </p>
+                            </div>
                         </div>
+                        <button type="button" wire:click="closeModal" class="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <x-heroicon name="x-mark" class="w-5 h-5" style="color: var(--muted-foreground);" />
+                        </button>
                     </div>
 
                     {{-- Modal Form --}}
-                    <form wire:submit="save" class="bg-white dark:bg-gray-800">
+                    <form wire:submit.prevent="save">
                         <div class="px-6 py-6 space-y-6 max-h-96 overflow-y-auto">
                             {{-- Error Display --}}
                             @if($errors->has('form'))
@@ -201,18 +182,19 @@
                         </div>
 
                         {{-- Modal Footer --}}
-                        <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 border-t border-gray-200 dark:border-gray-600">
-                            <button type="button" 
-                                    wire:click="closeModal"
-                                    class="w-full sm:w-auto btn-secondary px-4 py-2 text-sm rounded-lg transition-all hover:scale-105">
+                        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t" style="border-color: var(--border);">
+                            <button type="button" wire:click="closeModal" class="w-full sm:w-auto btn-secondary px-4 py-2 text-sm">
                                 <x-heroicon name="x-mark" class="w-4 h-4" />
                                 Cancel
                             </button>
-                            
-                            <button type="submit" 
-                                    class="w-full sm:w-auto btn px-4 py-2 text-sm rounded-lg transition-all hover:scale-105 shadow-lg">
-                                <x-heroicon name="{{ $isEditing ? 'check' : 'plus' }}" class="w-4 h-4" />
-                                {{ $isEditing ? 'Update Client' : 'Create Client' }}
+
+                            <button type="submit" class="w-full sm:w-auto btn px-4 py-2 text-sm" wire:loading.attr="disabled" wire:target="save">
+                                <svg wire:loading wire:target="save" class="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                </svg>
+                                <x-heroicon name="{{ $isEditing ? 'check' : 'plus' }}" class="w-4 h-4" wire:loading.remove wire:target="save" />
+                                <span wire:loading.remove wire:target="save">{{ $isEditing ? 'Update Client' : 'Create Client' }}</span>
                             </button>
                         </div>
                     </form>
@@ -222,9 +204,15 @@
     @endif
 </div>
 
-{{-- Alpine.js for animations --}}
-<script>
-    document.addEventListener('alpine:init', () => {
-        // Modal animations are handled by Alpine.js x-transition directives
-    });
-</script>
+<style>
+    @keyframes modal-appear {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+</style>

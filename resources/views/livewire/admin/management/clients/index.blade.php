@@ -36,10 +36,10 @@
         ])
 
         {{-- Table Container --}}
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-border">
+        <div class="overflow-x-auto rounded-2xl border" style="border-color: var(--border); background: var(--card);">
+            <table class="min-w-full text-sm">
+                <thead style="background: color-mix(in oklab, var(--muted) 60%, transparent); color: var(--muted-foreground);">
+                    <tr class="border-b" style="border-color: var(--border);">
                         <th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('name')">
                             <div class="flex items-center gap-2">
                                 <span>Name</span>
@@ -78,8 +78,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @for($i = 0; $i < 3; $i++)
+                        <tr class="border-t animate-pulse" style="border-color: var(--border);" wire:loading>
+                            @for($j = 0; $j < 7; $j++)
+                                <td class="px-4 py-3">
+                                    <div class="h-4 rounded bg-muted"></div>
+                                </td>
+                            @endfor
+                        </tr>
+                    @endfor
+
                     @forelse($clients as $client)
-                        <tr class="table-row group">
+                        <tr class="table-row group" wire:loading.remove>
                             {{-- Name Column --}}
                             <td class="table-cell">
                                 <div class="flex items-center gap-3">
@@ -118,6 +128,9 @@
                                 @else
                                     <span class="text-xs text-muted-foreground">Not provided</span>
                                 @endif
+                                @if(!$client->id_card || !$client->phone)
+                                    <span class="status-badge status-warning mt-1">Incomplete</span>
+                                @endif
                             </td>
 
                             {{-- Vessels Column --}}
@@ -153,21 +166,23 @@
                             {{-- Actions Column --}}
                             <td class="table-cell text-right">
                                 <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button wire:click="editClient({{ $client->id }})" 
+                                    <button wire:click="editClient({{ $client->id }})"
                                             class="action-btn action-btn-edit"
-                                            title="Edit Client">
+                                            title="Edit Client"
+                                            wire:loading.attr="disabled" wire:target="editClient">
                                         <x-heroicon name="pencil" class="w-4 h-4" />
                                     </button>
-                                    <button wire:click="deleteClient({{ $client->id }})" 
+                                    <button wire:click="deleteClient({{ $client->id }})"
                                             class="action-btn action-btn-delete"
-                                            title="Delete Client">
+                                            title="Delete Client"
+                                            wire:loading.attr="disabled" wire:target="deleteClient">
                                         <x-heroicon name="trash" class="w-4 h-4" />
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr>
+                        <tr wire:loading.remove>
                             <td colspan="7" class="text-center py-12">
                                 <div class="flex flex-col items-center gap-4">
                                     <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
