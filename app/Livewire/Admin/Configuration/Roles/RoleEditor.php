@@ -66,6 +66,12 @@ class RoleEditor extends Component
 
     public function updatedPerPage(): void
     {
+        // Coerce to allowed values
+        $allowed = [5, 10, 25, 50, 100];
+        $this->perPage = in_array((int) $this->perPage, $allowed, true)
+            ? (int) $this->perPage
+            : 25;
+
         $this->resetPage();
         $this->renderNonce++;
     }
