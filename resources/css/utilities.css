@@ -1,0 +1,21 @@
+@layer utilities {
+  @utility text-foreground {
+    color: var(--foreground);
+  }
+
+  @utility text-muted-foreground {
+    color: var(--muted-foreground);
+  }
+
+  @utility border-border {
+    border-color: var(--border);
+  }
+
+  @utility bg-muted {
+    background-color: var(--muted);
+  }
+
+  @utility text-primary {
+    color: var(--primary);
+  }
+}
