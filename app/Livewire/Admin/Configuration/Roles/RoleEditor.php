@@ -14,12 +14,21 @@ class RoleEditor extends Component
     public $role;
     public $group = 'all';
     public $search = '';
+    public $groupFilter = 'all';
     public $assigned = [];
     public $original = [];
     public $dirty = false;
 
-    public function mount($roleId)
+    protected $listeners = [
+        'apply' => 'apply',
+        'discard' => 'discard',
+    ];
+
+    public function mount($roleId, $search = '', $groupFilter = 'all')
     {
+        $this->search = $search;
+        $this->groupFilter = $groupFilter;
+        $this->group = $groupFilter; // Keep backward compatibility
         $this->loadRole($roleId);
     }
 
@@ -39,6 +48,7 @@ class RoleEditor extends Component
     public function updatedAssigned()
     {
         $this->dirty = $this->hasChanges();
+        $this->dispatch('roleEditorDirtyChanged', $this->dirty);
     }
 
     public function updatedSearch()
@@ -95,6 +105,7 @@ class RoleEditor extends Component
             $this->role->syncPermissions($this->assigned);
             app(PermissionRegistrar::class)->forgetCachedPermissions();
             $this->loadRole($this->role->id);
+            $this->dispatch('roleEditorDirtyChanged', false);
             $this->dispatch('notify', type: 'success', message: 'Permissions updated');
         } catch (\Exception $e) {
             $this->dispatch(
@@ -113,7 +124,9 @@ class RoleEditor extends Component
     {
         $this->assigned = $this->original;
         $this->dirty = false;
+        $this->dispatch('roleEditorDirtyChanged', false);
     }
+
 
     protected function permissionsQuery()
     {
@@ -124,23 +137,24 @@ class RoleEditor extends Component
     public function getPermissionsProperty()
     {
         $query = $this->permissionsQuery();
-
-        if ($this->group !== 'all') {
-            $query = $query->get()->filter(function ($perm) {
-                return $this->deriveGroup($perm->name) === $this->group;
+        $allPermissions = $query->get();
+        
+        // Apply group filter
+        if ($this->groupFilter !== 'all') {
+            $allPermissions = $allPermissions->filter(function ($perm) {
+                return $this->deriveGroup($perm->name) === $this->groupFilter;
             });
-        } else {
-            $query = $query->get();
         }
-
+        
+        // Apply search filter
         if ($this->search) {
             $search = Str::lower($this->search);
-            $query = $query->filter(function ($perm) use ($search) {
+            $allPermissions = $allPermissions->filter(function ($perm) use ($search) {
                 return Str::contains(Str::lower($perm->name), $search);
             });
         }
-
-        return $query->groupBy(fn($perm) => $this->deriveGroup($perm->name));
+        
+        return $allPermissions->groupBy(fn($perm) => $this->deriveGroup($perm->name));
     }
 
     public function getGroupsProperty()

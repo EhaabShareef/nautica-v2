@@ -62,8 +62,8 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t" style="border-color:var(--border);">
-                    <button type="button" wire:click="closeModal" class="btn-secondary">Cancel</button>
-                    <button type="submit" class="btn">{{ $editingSlot ? 'Update Slot' : 'Create Slot' }}</button>
+                    <button type="button" wire:click="closeModal" class="btn-secondary px-3 py-2 h-10 text-sm">Cancel</button>
+                    <button type="submit" class="btn px-3 py-2 h-10 text-sm">{{ $editingSlot ? 'Update Slot' : 'Create Slot' }}</button>
                 </div>
             </form>
         </div>

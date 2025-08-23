@@ -14,25 +14,25 @@
                 </div>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search by code or location..." class="form-input pl-10 h-10 text-sm">
             </div>
-            <select wire:model="property_id" class="form-input h-10 text-sm w-full sm:w-auto">
+            <select wire:model="property_id" class="form-select h-10 text-sm px-3 py-2 rounded-xl border w-full sm:w-auto" style="background-color: var(--card); border-color: var(--border);">
                 <option value="">All Properties</option>
                 @foreach($properties as $property)
                     <option value="{{ $property->id }}">{{ $property->name }}</option>
                 @endforeach
             </select>
-            <select wire:model="block_id" class="form-input h-10 text-sm w-full sm:w-auto">
+            <select wire:model="block_id" class="form-select h-10 text-sm px-3 py-2 rounded-xl border w-full sm:w-auto" style="background-color: var(--card); border-color: var(--border);">
                 <option value="">All Blocks</option>
                 @foreach($blocks as $block)
                     <option value="{{ $block->id }}">{{ $block->name }}</option>
                 @endforeach
             </select>
-            <select wire:model="zone_id" class="form-input h-10 text-sm w-full sm:w-auto">
+            <select wire:model="zone_id" class="form-select h-10 text-sm px-3 py-2 rounded-xl border w-full sm:w-auto" style="background-color: var(--card); border-color: var(--border);">
                 <option value="">All Zones</option>
                 @foreach($zones as $zone)
                     <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                 @endforeach
             </select>
-            <select wire:model="perPage" class="form-input h-10 text-sm w-full sm:w-auto">
+            <select wire:model="perPage" class="form-select h-10 text-sm px-3 py-2 rounded-xl border w-full sm:w-auto" style="background-color: var(--card); border-color: var(--border);">
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>

@@ -1,26 +1,13 @@
 <div>
-    <div class="flex flex-col md:flex-row gap-4 mb-4">
-        <div class="flex-1">
-            <input type="text" wire:model.debounce.500ms="search" placeholder="Search permissions..." class="w-full border sys-border rounded-md p-2" />
-        </div>
-        <div>
-            <select wire:model="group" class="border sys-border rounded-md p-2">
-                <option value="all">All groups</option>
-                @foreach($groups as $g)
-                    <option value="{{ $g }}">{{ $g }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
         @foreach($permissionGroups as $groupName => $permissions)
-            <div class="border rounded-md p-4">
+            <div class="backdrop-blur-sm bg-white/10 dark:bg-gray-800/10 rounded-xl p-4 shadow-sm" style="background: color-mix(in oklab, var(--card) 60%, transparent); backdrop-filter: blur(8px);">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-semibold">{{ $groupName }} <span class="text-sm" style="color: var(--muted-foreground);">({{ collect($permissions)->pluck('id')->intersect($assigned)->count() }} / {{ count($permissions) }})</span></h3>
-                    <div class="space-x-2">
-                        <button type="button" wire:click='grantAll(@js($groupName))' class="btn-secondary text-xs">Grant All</button>
-                        <button type="button" wire:click='revokeAll(@js($groupName))' class="btn-secondary text-xs">Revoke All</button>
+                    <h3 class="font-medium text-sm uppercase tracking-wide" style="color: var(--foreground);">{{ $groupName }} <span class="text-xs normal-case" style="color: var(--muted-foreground);">({{ collect($permissions)->pluck('id')->intersect($assigned)->count() }} / {{ count($permissions) }})</span></h3>
+                    <div class="flex gap-2">
+                        <button type="button" wire:click='grantAll(@js($groupName))' class="btn-secondary px-3 py-1 h-8 text-xs rounded-lg transition-all hover:-translate-y-0.5">Grant All</button>
+                        <button type="button" wire:click='revokeAll(@js($groupName))' class="btn-secondary px-3 py-1 h-8 text-xs rounded-lg transition-all hover:-translate-y-0.5">Revoke All</button>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -35,8 +22,4 @@
         @endforeach
     </div>
 
-    <div class="mt-6 flex gap-2">
-        <button wire:click="apply" class="btn-primary" @disabled(! $dirty)>Apply Changes</button>
-        <button wire:click="discard" class="btn-secondary" @disabled(! $dirty)>Discard</button>
-    </div>
 </div>
