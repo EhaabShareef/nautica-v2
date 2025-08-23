@@ -14,6 +14,6 @@
     </div>
 
     @if($selectedRoleId)
-        @livewire('admin.configuration.roles.role-editor', ['roleId' => $selectedRoleId], key('role-'.$selectedRoleId))
+        @livewire('admin.configuration.roles.role-editor', ['selectedRoleId' => $selectedRoleId], key('role-'.$selectedRoleId))
     @endif
 </div>
