@@ -81,7 +81,7 @@ class DemoDataSeeder extends Seeder
         );
 
         $vessel = Vessel::updateOrCreate(
-            ['user_id' => $client->id, 'name' => 'Sea Breeze'],
+            ['owner_client_id' => $client->id, 'name' => 'Sea Breeze'],
             [
                 'registration_number' => 'SB-2024-001',
                 'type' => 'yacht',

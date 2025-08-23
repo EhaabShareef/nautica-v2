@@ -14,18 +14,24 @@ return new class extends Migration
         // Vessels table
         Schema::create('vessels', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('owner_client_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('renter_client_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('name');
-            $table->string('registration_number')->unique()->nullable();
+            $table->string('registration_number')->unique();
             $table->string('type')->nullable();
             $table->decimal('length', 8, 2)->nullable();
             $table->decimal('width', 8, 2)->nullable();
             $table->decimal('draft', 8, 2)->nullable();
             $table->json('specifications')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->index(['user_id', 'is_active']);
+            $table->index(['owner_client_id', 'is_active']);
+            $table->index('renter_client_id');
+            $table->index('type');
         });
 
         // Bookings table (with restrictOnDelete for slots from the start)

@@ -27,6 +27,7 @@ class User extends Authenticatable
         'id_card',
         'address',
         'is_active',
+        'is_blacklisted',
     ];
 
     /**
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_blacklisted' => 'boolean',
             'last_login_at' => 'datetime',
         ];
     }
@@ -59,7 +61,7 @@ class User extends Authenticatable
      */
     public function vessels()
     {
-        return $this->hasMany(Vessel::class);
+        return $this->hasMany(Vessel::class, 'owner_client_id');
     }
 
     public function isClient(): bool
@@ -116,6 +118,14 @@ class User extends Authenticatable
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for users that are not blacklisted
+     */
+    public function scopeNotBlacklisted($query)
+    {
+        return $query->where('is_blacklisted', false);
     }
 
     /**
