@@ -140,18 +140,52 @@ class DemoDataSeeder extends Seeder
         );
         $client2->assignRole('client');
 
-        $vessel = Vessel::updateOrCreate(
+        // Create additional clients for more diverse demo data
+        $client3 = User::updateOrCreate(
+            ['email' => 'maria.santos@nautica.com'],
+            [
+                'name' => 'Maria Santos',
+                'password' => Hash::make('password'),
+                'user_type' => 'client',
+                'phone' => '+1-555-0789',
+                'id_card' => 'ID456789123',
+                'address' => '321 Yacht Club Drive, Marina Bay, MB 98765',
+                'is_active' => true,
+                'is_blacklisted' => false,
+            ]
+        );
+        $client3->assignRole('client');
+
+        // Create an inactive client for testing
+        $inactiveClient = User::updateOrCreate(
+            ['email' => 'inactive@nautica.com'],
+            [
+                'name' => 'Inactive Client',
+                'password' => Hash::make('password'),
+                'user_type' => 'client',
+                'phone' => '+1-555-0000',
+                'id_card' => 'ID000000000',
+                'address' => '000 Inactive Street, Nowhere, NW 00000',
+                'is_active' => false,
+                'is_blacklisted' => false,
+            ]
+        );
+        $inactiveClient->assignRole('client');
+
+        // Create diverse vessels with proper types from app_types
+        $vessel1 = Vessel::updateOrCreate(
             ['owner_client_id' => $client->id, 'name' => 'Sea Breeze'],
             [
                 'registration_number' => 'SB-2024-001',
-                'type' => 'yacht',
+                'type' => 'motor_yacht',
                 'length' => 28.00,
                 'width' => 10.00,
                 'draft' => 6.00,
                 'specifications' => [
                     'engine' => 'Twin Diesel',
                     'fuel_capacity' => '500L',
-                    'year' => 2020
+                    'year' => '2020',
+                    'max_guests' => '8'
                 ],
                 'is_active' => true,
                 'created_by' => $admin->id,
@@ -159,7 +193,6 @@ class DemoDataSeeder extends Seeder
             ]
         );
 
-        // Create another vessel for client2
         $vessel2 = Vessel::updateOrCreate(
             ['owner_client_id' => $client2->id, 'name' => 'Ocean Explorer'],
             [
@@ -169,9 +202,94 @@ class DemoDataSeeder extends Seeder
                 'width' => 15.00,
                 'draft' => 4.00,
                 'specifications' => [
-                    'engine' => 'Outboard Motors',
+                    'engine' => 'Twin Outboard',
                     'fuel_capacity' => '300L',
-                    'year' => 2022
+                    'year' => '2022',
+                    'max_guests' => '12'
+                ],
+                'is_active' => true,
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
+            ]
+        );
+
+        $vessel3 = Vessel::updateOrCreate(
+            ['owner_client_id' => $client3->id, 'name' => 'Maldivian Pearl'],
+            [
+                'registration_number' => 'MP-2024-003',
+                'type' => 'dhoni',
+                'length' => 18.50,
+                'width' => 4.50,
+                'draft' => 2.00,
+                'specifications' => [
+                    'engine' => 'Single Diesel',
+                    'fuel_capacity' => '150L',
+                    'year' => '2021',
+                    'material' => 'Fiberglass'
+                ],
+                'is_active' => true,
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
+            ]
+        );
+
+        // Create a vessel with renter
+        $vessel4 = Vessel::updateOrCreate(
+            ['owner_client_id' => $client->id, 'name' => 'Wave Runner'],
+            [
+                'registration_number' => 'WR-2024-004',
+                'type' => 'speedboat',
+                'owner_client_id' => $client->id,
+                'renter_client_id' => $client2->id,
+                'length' => 22.00,
+                'width' => 8.50,
+                'draft' => 3.50,
+                'specifications' => [
+                    'engine' => 'High Performance V8',
+                    'fuel_capacity' => '200L',
+                    'year' => '2023',
+                    'max_speed' => '45 knots'
+                ],
+                'is_active' => true,
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
+            ]
+        );
+
+        // Create an inactive vessel
+        $vessel5 = Vessel::updateOrCreate(
+            ['owner_client_id' => $client3->id, 'name' => 'Maintenance Vessel'],
+            [
+                'registration_number' => 'MV-2024-005',
+                'type' => 'fishing_boat',
+                'length' => 16.00,
+                'width' => 5.00,
+                'draft' => 2.50,
+                'specifications' => [
+                    'engine' => 'Single Outboard',
+                    'fuel_capacity' => '80L',
+                    'year' => '2019',
+                    'status' => 'Under maintenance'
+                ],
+                'is_active' => false,
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
+            ]
+        );
+
+        // Create vessel for inactive client (to test eligibility checks)
+        $vessel6 = Vessel::updateOrCreate(
+            ['owner_client_id' => $inactiveClient->id, 'name' => 'Abandoned Vessel'],
+            [
+                'registration_number' => 'AV-2024-006',
+                'type' => 'jet_ski',
+                'length' => 3.50,
+                'width' => 1.20,
+                'draft' => 0.80,
+                'specifications' => [
+                    'engine' => 'Jet Propulsion',
+                    'fuel_capacity' => '70L',
+                    'year' => '2018'
                 ],
                 'is_active' => true,
                 'created_by' => $admin->id,
@@ -185,7 +303,7 @@ class DemoDataSeeder extends Seeder
         $booking = Booking::updateOrCreate(
             [
                 'user_id' => $client->id,
-                'vessel_id' => $vessel->id,
+                'vessel_id' => $vessel1->id,
                 'slot_id' => $slot->id,
             ],
             [

@@ -65,6 +65,11 @@ class User extends Authenticatable
         return $this->hasMany(Vessel::class, 'owner_client_id');
     }
 
+    public function rentedVessels()
+    {
+        return $this->hasMany(Vessel::class, 'renter_client_id');
+    }
+
     public function isClient(): bool
     {
         return $this->user_type === 'client';

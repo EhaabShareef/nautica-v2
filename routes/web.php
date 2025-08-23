@@ -4,6 +4,7 @@ use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Configuration\Index as ConfigurationIndex;
 use App\Livewire\Admin\Configuration\Roles\Index as RolesIndex;
 use App\Livewire\Admin\Management\Clients\Index as ClientsIndex;
+use App\Livewire\Admin\Management\Vessels\Index as VesselsIndex;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Client\Dashboard as ClientDashboard;
@@ -34,6 +35,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Management routes
     Route::prefix('management')->name('management.')->group(function () {
         Route::get('/clients', ClientsIndex::class)->name('clients');
+        Route::get('/vessels', VesselsIndex::class)->name('vessels');
     });
 });
 

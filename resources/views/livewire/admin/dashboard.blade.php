@@ -119,7 +119,7 @@
             <div class="nav-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
 
                 <!-- Vessel Management -->
-                <a href="#" class="nav-card management-nav-item text-white" data-section="vessels" style="text-decoration: none; background: linear-gradient(135deg, #059669 0%, #10b981 50% 10%);">
+                <a href="{{ route('admin.management.vessels') }}" class="nav-card management-nav-item text-white" data-section="vessels" style="text-decoration: none; background: linear-gradient(135deg, #059669 0%, #10b981 50%, #10b981 100%);">
                     <div class="nav-card-inner">
                         <div class="nav-icon">
                             <x-heroicon name="rocket-launch" class="w-6 h-6 text-white stroke-1" />

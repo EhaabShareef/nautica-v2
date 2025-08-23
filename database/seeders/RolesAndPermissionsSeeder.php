@@ -19,6 +19,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'config.roles.manage',
             'clients.manage',
             'clients.approve',
+            'vessels.view',
+            'vessels.create',
+            'vessels.update',
+            'vessels.delete',
+            'vessels.assign_renter',
             'bookings.manage',
             'bookings.approve',
             'contracts.manage',
@@ -31,8 +36,20 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $roles = [
             'admin' => $permissions,
-            'agent' => ['bookings.manage', 'contracts.manage', 'invoices.manage'],
-            'client' => [],
+            'agent' => [
+                'vessels.view',
+                'vessels.create', 
+                'vessels.update',
+                'vessels.assign_renter',
+                'bookings.manage', 
+                'contracts.manage', 
+                'invoices.manage'
+            ],
+            'client' => [
+                'vessels.view',
+                'vessels.create',
+                'vessels.update'
+            ],
         ];
 
         foreach ($roles as $role => $perms) {

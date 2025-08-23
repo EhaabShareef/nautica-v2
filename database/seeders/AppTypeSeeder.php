@@ -74,6 +74,18 @@ class AppTypeSeeder extends Seeder
                 ['code' => 'pending', 'label' => 'Pending'],
                 ['code' => 'rejected', 'label' => 'Rejected'],
             ],
+            'vessel_types' => [
+                ['code' => 'speedboat', 'label' => 'Speedboat'],
+                ['code' => 'catamaran', 'label' => 'Catamaran'],
+                ['code' => 'sailing_yacht', 'label' => 'Sailing Yacht'],
+                ['code' => 'motor_yacht', 'label' => 'Motor Yacht'],
+                ['code' => 'fishing_boat', 'label' => 'Fishing Boat'],
+                ['code' => 'dhoni', 'label' => 'Dhoni'],
+                ['code' => 'jet_ski', 'label' => 'Jet Ski'],
+                ['code' => 'pontoon', 'label' => 'Pontoon'],
+                ['code' => 'seaplane', 'label' => 'Seaplane'],
+                ['code' => 'cargo_vessel', 'label' => 'Cargo Vessel'],
+            ],
         ];
 
         foreach ($types as $group => $items) {
