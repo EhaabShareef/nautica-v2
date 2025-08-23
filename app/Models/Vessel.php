@@ -6,16 +6,28 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vessel extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
 
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'user_id', 'name', 'registration_number', 'type', 'length', 'width', 'draft', 'specifications', 'is_active'
+        'owner_client_id',
+        'renter_client_id',
+        'name',
+        'registration_number',
+        'type',
+        'length',
+        'width',
+        'draft',
+        'specifications',
+        'is_active',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [
@@ -26,9 +38,14 @@ class Vessel extends Model
         'draft' => 'decimal:2',
     ];
 
-    public function user()
+    public function owner()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'owner_client_id');
+    }
+
+    public function renter()
+    {
+        return $this->belongsTo(User::class, 'renter_client_id');
     }
 
     public function bookings()
