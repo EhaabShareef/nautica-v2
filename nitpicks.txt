@@ -1,0 +1,137 @@
+resources/views/livewire/admin/management/clients/index.blade.php (5)
+39-41: Improve table header semantics and keyboard accessibility for sorting.
+
+Clickable elements aren’t keyboard focusable by default. Add scope, role, tabindex, Enter-key handler, and dynamic aria-sort for screen readers.
+
+Apply this diff:
+
+-<th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('name')">
++<th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
++    wire:click="sortBy('name')"
++    wire:keydown.enter="sortBy('name')"
++    role="button" tabindex="0"
++    aria-sort="{{ $sortBy === 'name' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+...
+-<th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('email')">
++<th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
++    wire:click="sortBy('email')"
++    wire:keydown.enter="sortBy('email')"
++    role="button" tabindex="0"
++    aria-sort="{{ $sortBy === 'email' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+...
+-<th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('is_active')">
++<th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
++    wire:click="sortBy('is_active')"
++    wire:keydown.enter="sortBy('is_active')"
++    role="button" tabindex="0"
++    aria-sort="{{ $sortBy === 'is_active' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+...
+-<th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('created_at')">
++<th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
++    wire:click="sortBy('created_at')"
++    wire:keydown.enter="sortBy('created_at')"
++    role="button" tabindex="0"
++    aria-sort="{{ $sortBy === 'created_at' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
+Also applies to: 43-77
+
+=====
+
+resources/css/app.css (1)
+1362-1365: Additive utility looks good; consider a focus-visible state for keyboard users.
+
+.status-warning is consistent with the existing status-* badges. For better a11y affordance in interactive contexts (e.g., clickable badges/filters), consider adding a focus-visible ring variant.
+
+Example (if you use it on focusable elements):
+
++.status-warning:focus-visible {
++  outline: 2px solid theme(colors.yellow.400);
++  outline-offset: 2px;
++}
+
+=====
+
+resources/views/livewire/admin/management/clients/client-delete.blade.php (4)
+4-9: Add aria-labelledby/aria-describedby for the dialog.
+
+Good use of role="dialog" and aria-modal. Add explicit labels for stronger a11y.
+
+-             wire:ignore.self role="dialog" aria-modal="true">
++             wire:ignore.self role="dialog" aria-modal="true"
++             aria-labelledby="client-delete-title"
++             aria-describedby="client-delete-desc">
+...
+-                                <h3 class="text-lg leading-6 font-medium" style="color: var(--foreground);">
++                                <h3 id="client-delete-title" class="text-lg leading-6 font-medium" style="color: var(--foreground);">
+...
+-                                    <p class="text-sm" style="color: var(--muted-foreground);">
++                                    <p id="client-delete-desc" class="text-sm" style="color: var(--muted-foreground);">
+Also applies to: 25-31
+
+12-12: Remove redundant inline backdrop blur.
+
+backdrop-blur-sm already applies the blur; the additional inline style duplicates it.
+
+-            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal" style="backdrop-filter: blur(8px);"></div>
++            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
+156-160: Reflect disabled state with aria-disabled for AT users.
+
+Button is visually disabled; expose it programmatically too.
+
+-                            <button type="button" disabled class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-400 bg-gray-200 dark:bg-gray-600 cursor-not-allowed opacity-50">
++                            <button type="button" disabled aria-disabled="true" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-400 bg-gray-200 dark:bg-gray-600 cursor-not-allowed opacity-50">
+168-179: De-duplicate modal keyframes: move modal-appear to app.css.
+
+modal-appear is defined here and in the form modal; centralize in CSS to avoid drift.
+
+Add to resources/css/app.css (once):
+
++@keyframes modal-appear {
++  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
++  to   { opacity: 1; transform: scale(1) translateY(0); }
++}
+Then remove the <style> block from both Blade files.
+
+=====
+
+esources/views/livewire/admin/management/clients/client-form.blade.php (3)
+4-9: Add aria-labelledby/aria-describedby for the form dialog.
+
+Match accessibility improvements from delete modal.
+
+-             wire:ignore.self role="dialog" aria-modal="true">
++             wire:ignore.self role="dialog" aria-modal="true"
++             aria-labelledby="client-form-title"
++             aria-describedby="client-form-desc">
+...
+-                                <h3 class="text-lg font-semibold" style="color: var(--foreground);">
++                                <h3 id="client-form-title" class="text-lg font-semibold" style="color: var(--foreground);">
+...
+-                                <p class="text-sm" style="color: var(--muted-foreground);">
++                                <p id="client-form-desc" class="text-sm" style="color: var(--muted-foreground);">
+Also applies to: 25-31
+
+15-16: Centralize modal animation keyframes in CSS; drop inline <style> duplication.
+
+Same suggestion as delete modal to avoid divergence and improve caching.
+
+Move modal-appear to app.css and remove the <style> block here.
+
+Also applies to: 207-218
+
+51-76: Add appropriate autocomplete attributes to improve UX and security.
+
+Helps browsers suggest correct data and handle password managers.
+
+Outside the changed lines, consider:
+
+<input id="name" autocomplete="name" ...>
+<input id="email" type="email" autocomplete="email" ...>
+<input id="phone" autocomplete="tel" ...>
+<input id="id_card" autocomplete="off" ...>
+<textarea id="address" autocomplete="street-address" ...></textarea>
+<input id="password" type="password" autocomplete="new-password" ...>
+<input id="password_confirmation" type="password" autocomplete="new-password" ...>
+If you support editing, ensure backend ignores blank password fields to keep existing credentials.
+
+Also applies to: 81-113, 129-164, 166-181
+

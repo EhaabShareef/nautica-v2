@@ -90,6 +90,7 @@ class ClientForm extends Component
     {
         $this->showModal = false;
         $this->resetForm();
+        $this->dispatchBrowserEvent('client-form:closed');
     }
 
     public function save()
