@@ -92,7 +92,9 @@
                                 @endif
                             </div>
                         </th>
-                        <th class="table-header text-right">Actions</th>
+                        <th class="table-header text-right">
+                            <span class="flex justify-end">Actions</span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,9 +155,9 @@
 
                             {{-- Vessels Column --}}
                             <td class="table-cell">
-                                <div class="flex items-center gap-1">
-                                    <x-heroicon name="rocket-launch" class="w-4 h-4 text-muted-foreground" />
-                                    <span class="text-sm font-medium">{{ $client->vessels_count }}</span>
+                                <div class="flex items-center gap-2">
+                                    <x-heroicon name="rocket-launch" class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                    <span class="text-sm font-medium text-foreground">{{ $client->vessels_count }}</span>
                                 </div>
                             </td>
 
