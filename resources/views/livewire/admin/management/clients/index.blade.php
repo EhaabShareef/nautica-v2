@@ -161,14 +161,19 @@
 
                             {{-- Status Column --}}
                             <td class="table-cell">
-                                @if($client->is_active)
+                                @if($client->is_blacklisted)
+                                    <span class="status-badge bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400">
+                                        <x-heroicon name="x-circle" class="w-3 h-3" />
+                                        Blacklisted
+                                    </span>
+                                @elseif($client->is_active)
                                     <span class="status-badge status-active">
                                         <x-heroicon name="check-circle" class="w-3 h-3" />
                                         Active
                                     </span>
                                 @else
                                     <span class="status-badge status-inactive">
-                                        <x-heroicon name="x-circle" class="w-3 h-3" />
+                                        <x-heroicon name="minus-circle" class="w-3 h-3" />
                                         Inactive
                                     </span>
                                 @endif
@@ -188,8 +193,23 @@
                                             class="action-btn action-btn-edit"
                                             title="Edit Client"
                                             wire:loading.attr="disabled" wire:target="editClient">
-                                        <x-heroicon name="pencil" class="w-4 h-4" />
+                                        <x-heroicon name="pencil-square" class="w-4 h-4" />
                                     </button>
+                                    @if(!$client->is_blacklisted)
+                                        <button wire:click="blacklistClient({{ $client->id }})"
+                                                class="action-btn hover:bg-yellow-100 dark:hover:bg-yellow-900/20 hover:text-yellow-600"
+                                                title="Blacklist Client"
+                                                wire:loading.attr="disabled" wire:target="blacklistClient">
+                                            <x-heroicon name="x-circle" class="w-4 h-4" />
+                                        </button>
+                                    @else
+                                        <button wire:click="unblacklistClient({{ $client->id }})"
+                                                class="action-btn hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600"
+                                                title="Remove from Blacklist"
+                                                wire:loading.attr="disabled" wire:target="unblacklistClient">
+                                            <x-heroicon name="check-circle" class="w-4 h-4" />
+                                        </button>
+                                    @endif
                                     <button wire:click="deleteClient({{ $client->id }})"
                                             class="action-btn action-btn-delete"
                                             title="Delete Client"
@@ -241,6 +261,7 @@
     {{-- Child Components --}}
     @livewire('admin.management.clients.client-form')
     @livewire('admin.management.clients.client-delete')
+    @livewire('admin.management.clients.client-blacklist')
 </div>
 
 {{-- Toast Notifications --}}

@@ -19,6 +19,7 @@
                 <option value="all">All</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
+                <option value="blacklisted">Blacklisted</option>
             </select>
 
             {{-- Per Page --}}
@@ -67,6 +68,7 @@
                 <option value="all">All</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
+                <option value="blacklisted">Blacklisted</option>
             </select>
         </div>
 

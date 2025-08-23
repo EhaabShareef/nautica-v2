@@ -158,7 +158,7 @@
                                         class="btn-secondary inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg min-w-[4.5rem]"
                                         aria-label="Edit {{ $property->name }}"
                                     >
-                                        <x-heroicon name="pencil" class="w-4 h-4" />
+                                        <x-heroicon name="pencil-square" class="w-4 h-4" />
                                         <span>Edit</span>
                                     </button>
 
@@ -274,7 +274,7 @@
                         wire:click="edit('{{ $property->id }}')"
                         class="btn-secondary inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg min-w-[4.5rem]"
                     >
-                        <x-heroicon name="pencil" class="w-4 h-4" />
+                        <x-heroicon name="pencil-square" class="w-4 h-4" />
                         Edit
                     </button>
 

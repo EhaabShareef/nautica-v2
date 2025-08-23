@@ -13,7 +13,7 @@ class Index extends Component
 
     // Search and filter properties
     public $search = '';
-    public $statusFilter = 'all'; // all, active, inactive
+    public $statusFilter = 'all'; // all, active, inactive, blacklisted
     public $perPage = 10;
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
@@ -39,6 +39,14 @@ class Index extends Component
         $this->statusFilter = $filters['statusFilter'] ?? 'all';
         $this->perPage = $filters['perPage'] ?? 10;
         $this->resetPage();
+    }
+
+    #[On('client-blacklisted')]
+    #[On('client-unblacklisted')]
+    public function refreshAfterBlacklistChange()
+    {
+        // Refresh the component to show updated data
+        $this->render();
     }
 
     public function updatingSearch()
@@ -87,11 +95,21 @@ class Index extends Component
         $this->dispatch('openClientDelete', clientId: $clientId);
     }
 
+    public function blacklistClient($clientId)
+    {
+        $this->dispatch('blacklist-client', clientId: $clientId);
+    }
+
+    public function unblacklistClient($clientId)
+    {
+        $this->dispatch('blacklist-client', clientId: $clientId);
+    }
+
     public function getClientsProperty()
     {
         $query = User::clients()
             ->withCount('vessels')
-            ->select(['id', 'name', 'email', 'phone', 'id_card', 'is_active', 'created_at', 'last_login_at']);
+            ->select(['id', 'name', 'email', 'phone', 'id_card', 'is_active', 'is_blacklisted', 'created_at', 'last_login_at']);
 
         // Apply search
         if (!empty($this->search)) {
@@ -105,9 +123,11 @@ class Index extends Component
 
         // Apply status filter
         if ($this->statusFilter === 'active') {
-            $query->active();
+            $query->active()->where('is_blacklisted', false);
         } elseif ($this->statusFilter === 'inactive') {
-            $query->where('is_active', false);
+            $query->where('is_active', false)->where('is_blacklisted', false);
+        } elseif ($this->statusFilter === 'blacklisted') {
+            $query->where('is_blacklisted', true);
         }
 
         // Apply sorting

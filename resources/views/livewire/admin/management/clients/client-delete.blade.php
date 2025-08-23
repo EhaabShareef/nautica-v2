@@ -1,7 +1,7 @@
 {{-- Client Delete Modal --}}
 <div>
     @if($showModal && $client)
-        <div class="fixed inset-0 z-50 overflow-y-auto" 
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4" 
              wire:ignore.self role="dialog" aria-modal="true"
              aria-labelledby="client-delete-title"
              aria-describedby="client-delete-desc">

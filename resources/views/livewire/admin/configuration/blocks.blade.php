@@ -63,7 +63,7 @@
                             <td class="px-4 py-3 align-middle">
                                 <div class="flex items-center justify-end gap-2">
                                     <button wire:click="edit('{{ $block->id }}')" class="btn-secondary inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg min-w-[4.5rem]" aria-label="Edit {{ $block->name }}">
-                                        <x-heroicon name="pencil" class="w-4 h-4" />
+                                        <x-heroicon name="pencil-square" class="w-4 h-4" />
                                         <span>Edit</span>
                                     </button>
                                     <button wire:click="delete('{{ $block->id }}')" class="btn-destructive inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg min-w-[4.5rem]" aria-label="Delete {{ $block->name }}">
@@ -100,7 +100,7 @@
                 </div>
                 <div class="flex items-center justify-end gap-2">
                     <button wire:click="edit('{{ $block->id }}')" class="btn-secondary inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg min-w-[4.5rem]">
-                        <x-heroicon name="pencil" class="w-4 h-4" />
+                        <x-heroicon name="pencil-square" class="w-4 h-4" />
                         <span>Edit</span>
                     </button>
                     <button wire:click="delete('{{ $block->id }}')" class="btn-destructive inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg min-w-[4.5rem]">

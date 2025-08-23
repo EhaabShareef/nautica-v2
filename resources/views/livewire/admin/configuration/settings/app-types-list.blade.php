@@ -125,7 +125,7 @@
                                         class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg transition-colors"
                                         style="color: var(--primary); background: var(--primary-foreground);"
                                     >
-                                        <x-heroicon name="pencil" class="w-3 h-3" />
+                                        <x-heroicon name="pencil-square" class="w-3 h-3" />
                                         Edit
                                     </button>
                                     @if(!$type->is_protected)
@@ -209,7 +209,7 @@
                         class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg transition-colors"
                         style="color: var(--primary); background: var(--primary-foreground);"
                     >
-                        <x-heroicon name="pencil" class="w-3 h-3" />
+                        <x-heroicon name="pencil-square" class="w-3 h-3" />
                         Edit
                     </button>
                     @if(!$type->is_protected)

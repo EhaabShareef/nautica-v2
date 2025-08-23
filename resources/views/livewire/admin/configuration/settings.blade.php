@@ -72,7 +72,7 @@
                         <td>
                             <div style="display: flex; gap: 0.5rem;">
                                 <button wire:click="edit({{ $setting->key }})" class="btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                    <x-heroicon name="pencil" class="w-3 h-3" />
+                                    <x-heroicon name="pencil-square" class="w-3 h-3" />
                                     Edit
                                 </button>
                                 <button wire:click="delete({{ $setting->key }})" 

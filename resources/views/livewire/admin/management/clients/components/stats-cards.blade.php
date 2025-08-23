@@ -38,15 +38,15 @@
         </div>
     </div>
 
-    {{-- Clients with Vessels --}}
-    <div class="stat-card bg-purple-500/10 border-purple-300/30 dark:border-purple-500/20">
+    {{-- Blacklisted Clients --}}
+    <div class="stat-card bg-yellow-500/10 border-yellow-300/30 dark:border-yellow-500/20">
         <div class="flex items-center gap-3">
-            <div class="stat-icon bg-purple-500">
-                <x-heroicon name="rocket-launch" class="w-5 h-5 text-white" />
+            <div class="stat-icon bg-yellow-500">
+                <x-heroicon name="exclamation-triangle" class="w-5 h-5 text-white" />
             </div>
             <div>
-                <p class="stat-number text-purple-700 dark:text-purple-300">{{ $stats['clients_with_vessels'] }}</p>
-                <p class="stat-label text-purple-600 dark:text-purple-400">With Vessels</p>
+                <p class="stat-number text-yellow-700 dark:text-yellow-300">{{ $stats['blacklisted_clients'] ?? 0 }}</p>
+                <p class="stat-label text-yellow-600 dark:text-yellow-400">Blacklisted</p>
             </div>
         </div>
     </div>
