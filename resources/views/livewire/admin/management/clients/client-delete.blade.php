@@ -1,12 +1,13 @@
 {{-- Client Delete Modal --}}
 <div>
     @if($showModal && $client)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
-             x-data
-             x-init="$nextTick(() => { document.body.style.overflow='hidden' })"
-             x-on:keydown.escape.window="$wire.closeModal()"
-             x-on:client-delete:closed.window="$nextTick(() => { document.body.style.overflow=''; })"
-             wire:ignore.self role="dialog" aria-modal="true">
+    public function closeModal()
+    {
+        $this->showModal = false;
+        $this->client = null;
+        // Restore body scroll via browser event
+        $this->dispatchBrowserEvent('client-delete:closed');
+    }
 
             {{-- Full-screen backdrop --}}
             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal" style="backdrop-filter: blur(8px);"></div>
