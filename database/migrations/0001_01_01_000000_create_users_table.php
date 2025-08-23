@@ -15,10 +15,22 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->enum('user_type', ['admin', 'client'])->default('client');
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('phone', 20)->nullable();
+            $table->string('id_card', 50)->nullable()->unique();
+            $table->text('address')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_blacklisted')->default(false);
+            $table->timestamp('last_login_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            
+            // Add indexes for better performance
+            $table->index(['user_type', 'is_active']);
+            $table->index('id_card');
+            $table->index('is_blacklisted');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

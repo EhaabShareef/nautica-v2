@@ -22,16 +22,31 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create users
+        // Create users with proper user_type and additional fields
         $admin = User::updateOrCreate(
             ['email' => 'admin@nautica.com'],
-            ['name' => 'Admin User', 'password' => Hash::make('password')]
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'user_type' => 'admin',
+                'is_active' => true,
+                'is_blacklisted' => false,
+            ]
         );
         $admin->assignRole('admin');
 
         $client = User::updateOrCreate(
             ['email' => 'client@nautica.com'],
-            ['name' => 'Demo Client', 'password' => Hash::make('password')]
+            [
+                'name' => 'Demo Client',
+                'password' => Hash::make('password'),
+                'user_type' => 'client',
+                'phone' => '+1-555-0123',
+                'id_card' => 'ID123456789',
+                'address' => '456 Client Street, Demo City, DC 12345',
+                'is_active' => true,
+                'is_blacklisted' => false,
+            ]
         );
         $client->assignRole('client');
 
@@ -80,6 +95,51 @@ class DemoDataSeeder extends Seeder
             ]
         );
 
+        // Create additional slots for more demo data
+        $slot2 = Slot::updateOrCreate(
+            ['zone_id' => $zone->id, 'code' => 'SLOT-002'],
+            [
+                'name' => 'Slot 002',
+                'location' => 'Dock 2',
+                'length' => 40.00,
+                'width' => 15.00,
+                'depth' => 10.00,
+                'amenities' => ['power', 'water', 'wifi', 'pump_out'],
+                'base_rate' => 200.00,
+                'is_active' => true
+            ]
+        );
+
+        $slot3 = Slot::updateOrCreate(
+            ['zone_id' => $zone->id, 'code' => 'SLOT-003'],
+            [
+                'name' => 'Slot 003',
+                'location' => 'Dock 3',
+                'length' => 25.00,
+                'width' => 10.00,
+                'depth' => 6.00,
+                'amenities' => ['power', 'water'],
+                'base_rate' => 120.00,
+                'is_active' => true
+            ]
+        );
+
+        // Create additional clients for more demo data
+        $client2 = User::updateOrCreate(
+            ['email' => 'john.doe@nautica.com'],
+            [
+                'name' => 'John Doe',
+                'password' => Hash::make('password'),
+                'user_type' => 'client',
+                'phone' => '+1-555-0456',
+                'id_card' => 'ID987654321',
+                'address' => '789 Marina Blvd, Coast City, CC 54321',
+                'is_active' => true,
+                'is_blacklisted' => false,
+            ]
+        );
+        $client2->assignRole('client');
+
         $vessel = Vessel::updateOrCreate(
             ['owner_client_id' => $client->id, 'name' => 'Sea Breeze'],
             [
@@ -93,7 +153,29 @@ class DemoDataSeeder extends Seeder
                     'fuel_capacity' => '500L',
                     'year' => 2020
                 ],
-                'is_active' => true
+                'is_active' => true,
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
+            ]
+        );
+
+        // Create another vessel for client2
+        $vessel2 = Vessel::updateOrCreate(
+            ['owner_client_id' => $client2->id, 'name' => 'Ocean Explorer'],
+            [
+                'registration_number' => 'OE-2024-002',
+                'type' => 'catamaran',
+                'length' => 35.00,
+                'width' => 15.00,
+                'draft' => 4.00,
+                'specifications' => [
+                    'engine' => 'Outboard Motors',
+                    'fuel_capacity' => '300L',
+                    'year' => 2022
+                ],
+                'is_active' => true,
+                'created_by' => $admin->id,
+                'updated_by' => $admin->id,
             ]
         );
 

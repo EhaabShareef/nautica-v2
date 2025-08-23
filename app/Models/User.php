@@ -27,7 +27,8 @@ class User extends Authenticatable
         'id_card',
         'address',
         'is_active',
-        'is_blacklisted',
+        // 'is_blacklisted' - Removed from fillable to prevent mass assignment
+        // Must be set explicitly: $user->is_blacklisted = true; $user->save();
     ];
 
     /**

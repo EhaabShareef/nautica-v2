@@ -26,8 +26,8 @@ class Vessel extends Model
         'draft',
         'specifications',
         'is_active',
-        'created_by',
-        'updated_by',
+        // 'created_by', 'updated_by' - Removed from fillable to prevent mass assignment
+        // These audit fields are automatically managed by VesselObserver
     ];
 
     protected $casts = [
