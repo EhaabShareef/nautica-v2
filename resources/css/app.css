@@ -932,22 +932,7 @@ body {
     overflow: hidden;
 }
 
-.nav-section-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
-    background-size: 200% 100%;
-    animation: gradient-shift 3s ease infinite;
-}
-
-@keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
+/* Removed nav-section-card::before border entirely */
 
 .nav-icon-wrapper {
     position: relative;

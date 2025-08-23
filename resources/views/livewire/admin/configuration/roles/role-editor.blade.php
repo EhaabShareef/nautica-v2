@@ -1,4 +1,4 @@
-<div wire:key="role-editor-{{ $selectedRoleId }}-{{ $filterGroup }}-{{ $search }}-{{ $page }}-{{ $renderNonce }}">
+<div wire:key="role-editor-{{ $selectedRoleId }}-{{ $filterGroup }}-{{ $search }}-{{ $renderNonce }}">
     <div class="flex flex-col md:flex-row gap-4 mb-4">
         <div class="flex-1">
             <input type="text" wire:model.debounce.300ms="search" placeholder="Search permissions..." class="w-full border sys-border rounded-md p-2" />

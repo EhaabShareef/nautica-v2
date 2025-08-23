@@ -22,8 +22,10 @@
             </a>
         </div>
 
-        {{-- Stats Cards --}}
-        @livewire('admin.management.clients.components.stats-cards')
+        {{-- Stats Cards - Hidden on mobile --}}
+        <div class="hidden md:block">
+            @livewire('admin.management.clients.components.stats-cards')
+        </div>
     </div>
 
     {{-- Main Content Card --}}
