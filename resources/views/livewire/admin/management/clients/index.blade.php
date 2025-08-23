@@ -40,7 +40,11 @@
             <table class="min-w-full text-sm">
                 <thead style="background: color-mix(in oklab, var(--muted) 60%, transparent); color: var(--muted-foreground);">
                     <tr class="border-b" style="border-color: var(--border);">
-                        <th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('name')">
+                        <th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
+                            wire:click="sortBy('name')"
+                            wire:keydown.enter="sortBy('name')"
+                            role="button" tabindex="0"
+                            aria-sort="{{ $sortBy === 'name' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
                             <div class="flex items-center gap-2">
                                 <span>Name</span>
                                 @if($sortBy === 'name')
@@ -48,7 +52,11 @@
                                 @endif
                             </div>
                         </th>
-                        <th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('email')">
+                        <th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
+                            wire:click="sortBy('email')"
+                            wire:keydown.enter="sortBy('email')"
+                            role="button" tabindex="0"
+                            aria-sort="{{ $sortBy === 'email' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
                             <div class="flex items-center gap-2">
                                 <span>Contact</span>
                                 @if($sortBy === 'email')
@@ -56,9 +64,13 @@
                                 @endif
                             </div>
                         </th>
-                        <th class="table-header">ID Card</th>
-                        <th class="table-header">Vessels</th>
-                        <th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('is_active')">
+                        <th scope="col" class="table-header">ID Card</th>
+                        <th scope="col" class="table-header">Vessels</th>
+                        <th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
+                            wire:click="sortBy('is_active')"
+                            wire:keydown.enter="sortBy('is_active')"
+                            role="button" tabindex="0"
+                            aria-sort="{{ $sortBy === 'is_active' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
                             <div class="flex items-center gap-2">
                                 <span>Status</span>
                                 @if($sortBy === 'is_active')
@@ -66,7 +78,11 @@
                                 @endif
                             </div>
                         </th>
-                        <th class="table-header cursor-pointer hover:bg-muted/50 transition-colors" wire:click="sortBy('created_at')">
+                        <th scope="col" class="table-header cursor-pointer hover:bg-muted/50 transition-colors"
+                            wire:click="sortBy('created_at')"
+                            wire:keydown.enter="sortBy('created_at')"
+                            role="button" tabindex="0"
+                            aria-sort="{{ $sortBy === 'created_at' ? ($sortDirection === 'asc' ? 'ascending' : 'descending') : 'none' }}">
                             <div class="flex items-center gap-2">
                                 <span>Joined</span>
                                 @if($sortBy === 'created_at')

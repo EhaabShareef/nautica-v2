@@ -1,16 +1,12 @@
 {{-- Client Delete Modal --}}
 <div>
     @if($showModal && $client)
-    public function closeModal()
-    {
-        $this->showModal = false;
-        $this->client = null;
-        // Restore body scroll via browser event
-        $this->dispatchBrowserEvent('client-delete:closed');
-    }
-
+        <div class="fixed inset-0 z-50 overflow-y-auto" 
+             wire:ignore.self role="dialog" aria-modal="true"
+             aria-labelledby="client-delete-title"
+             aria-describedby="client-delete-desc">
             {{-- Full-screen backdrop --}}
-            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal" style="backdrop-filter: blur(8px);"></div>
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
 
             {{-- Modal panel --}}
             <div class="relative w-full max-w-md transform transition-all duration-200"
@@ -23,11 +19,11 @@
                                 <x-heroicon name="exclamation-triangle" class="h-6 w-6 text-red-600" />
                             </div>
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
-                                <h3 class="text-lg leading-6 font-medium" style="color: var(--foreground);">
+                                <h3 id="client-delete-title" class="text-lg leading-6 font-medium" style="color: var(--foreground);">
                                     Delete Client
                                 </h3>
                                 <div class="mt-2">
-                                    <p class="text-sm" style="color: var(--muted-foreground);">
+                                    <p id="client-delete-desc" class="text-sm" style="color: var(--muted-foreground);">
                                         Are you sure you want to delete <strong>{{ $client->name }}</strong>? This action cannot be undone.
                                     </p>
                                 </div>
@@ -154,7 +150,7 @@
                                 <span wire:loading.remove wire:target="delete">Delete Client</span>
                             </button>
                         @else
-                            <button type="button" disabled class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-400 bg-gray-200 dark:bg-gray-600 cursor-not-allowed opacity-50">
+                            <button type="button" disabled aria-disabled="true" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-gray-400 bg-gray-200 dark:bg-gray-600 cursor-not-allowed opacity-50">
                                 <x-heroicon name="lock-closed" class="w-4 h-4" />
                                 Cannot Delete
                             </button>
@@ -165,16 +161,3 @@
         </div>
     @endif
 </div>
-
-<style>
-    @keyframes modal-appear {
-        from {
-            opacity: 0;
-            transform: scale(0.95) translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-</style>

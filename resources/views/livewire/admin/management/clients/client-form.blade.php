@@ -6,10 +6,12 @@
              x-init="$nextTick(() => { document.body.style.overflow='hidden' })"
              x-on:keydown.escape.window="$wire.closeModal()"
              x-on:client-form:closed.window="$nextTick(() => { document.body.style.overflow=''; })"
-             wire:ignore.self role="dialog" aria-modal="true">
+             wire:ignore.self role="dialog" aria-modal="true"
+             aria-labelledby="client-form-title"
+             aria-describedby="client-form-desc">
 
             {{-- Full-screen backdrop --}}
-            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal" style="backdrop-filter: blur(8px);"></div>
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
 
             {{-- Modal panel --}}
             <div class="relative w-full max-w-lg transform transition-all duration-200"
@@ -22,10 +24,10 @@
                                 <x-heroicon name="{{ $isEditing ? 'pencil' : 'user-plus' }}" class="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold" style="color: var(--foreground);">
+                                <h3 id="client-form-title" class="text-lg font-semibold" style="color: var(--foreground);">
                                     {{ $isEditing ? 'Edit Client' : 'Add New Client' }}
                                 </h3>
-                                <p class="text-sm" style="color: var(--muted-foreground);">
+                                <p id="client-form-desc" class="text-sm" style="color: var(--muted-foreground);">
                                     {{ $isEditing ? 'Update client information' : 'Create a new client account' }}
                                 </p>
                             </div>
@@ -56,6 +58,7 @@
                                 <input type="text" 
                                        id="name"
                                        wire:model="name"
+                                       autocomplete="name"
                                        class="form-input w-full {{ $errors->has('name') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
                                        placeholder="Enter client's full name">
                                 @error('name')
@@ -71,6 +74,7 @@
                                 <input type="email" 
                                        id="email"
                                        wire:model="email"
+                                       autocomplete="email"
                                        class="form-input w-full {{ $errors->has('email') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
                                        placeholder="client@example.com">
                                 @error('email')
@@ -88,6 +92,7 @@
                                     <input type="text" 
                                            id="phone"
                                            wire:model="phone"
+                                           autocomplete="tel"
                                            class="form-input w-full {{ $errors->has('phone') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
                                            placeholder="+1 234 567 8900">
                                     @error('phone')
@@ -103,6 +108,7 @@
                                     <input type="text" 
                                            id="id_card"
                                            wire:model="id_card"
+                                           autocomplete="off"
                                            class="form-input w-full {{ $errors->has('id_card') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
                                            placeholder="ID123456789">
                                     @error('id_card')
@@ -119,6 +125,7 @@
                                 <textarea id="address"
                                           wire:model="address"
                                           rows="3"
+                                          autocomplete="street-address"
                                           class="form-input w-full {{ $errors->has('address') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
                                           placeholder="Enter client's address"></textarea>
                                 @error('address')
@@ -204,15 +211,3 @@
     @endif
 </div>
 
-<style>
-    @keyframes modal-appear {
-        from {
-            opacity: 0;
-            transform: scale(0.95) translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-</style>
