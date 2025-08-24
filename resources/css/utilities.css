@@ -18,6 +18,10 @@
   color: var(--primary);
 }
 
+@utility text-destructive {
+  color: var(--destructive);
+}
+
 @utility btn {
     display: inline-flex;
     align-items: center;
