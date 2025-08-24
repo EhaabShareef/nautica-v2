@@ -59,8 +59,6 @@ body {
 .config-page .fade-in { animation: fade-in .28s ease-out both; }
 .config-page .slide-up { animation: slide-up .32s ease-out both; }
 
-@keyframes fade-in { from { opacity:0 } to { opacity:1 } }
-@keyframes slide-up { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
 
 /* Mobile niceties */
 .config-page .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
@@ -662,22 +660,6 @@ body {
 }
 
 
-/* Animations */
-@keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slide-up {
-    from { 
-        transform: translateY(2rem); 
-        opacity: 0; 
-    }
-    to { 
-        transform: translateY(0); 
-        opacity: 1; 
-    }
-}
 
 
 /* Enhanced Navigation Styles */
@@ -783,16 +765,6 @@ body {
     animation: pulse-glow 2s ease infinite;
 }
 
-@keyframes pulse-glow {
-    0%, 100% { 
-        transform: scale(1);
-        opacity: 0.2;
-    }
-    50% { 
-        transform: scale(1.05);
-        opacity: 0.4;
-    }
-}
 
 .nav-card h3 {
     font-size: 1rem;
@@ -1033,94 +1005,4 @@ body {
 }
 
 
-/* Client Management Components Styles */
-.stat-card {
-    @apply rounded-xl p-4 border transition-all hover:scale-105 hover:shadow-md;
-}
 
-.stat-icon {
-    @apply p-2 rounded-lg flex items-center justify-center;
-}
-
-.stat-number {
-    @apply text-2xl font-bold;
-}
-
-.stat-label {
-    @apply text-xs font-medium;
-}
-
-.action-bar {
-    @apply border-b border-border pb-6;
-}
-
-.table-header {
-    @apply text-left py-3 px-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider;
-}
-
-.table-cell {
-    @apply py-4 px-4 text-sm border-b border-gray-200 dark:border-gray-700;
-}
-
-.table-row {
-    @apply hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors;
-}
-
-.status-badge {
-    @apply inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium;
-}
-
-.status-active {
-    @apply bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400;
-}
-
-.status-inactive {
-    @apply bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400;
-}
-
-.status-warning {
-    @apply bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400;
-}
-
-.status-warning:focus-visible {
-    outline: 2px solid #f59e0b;
-    outline-offset: 2px;
-}
-
-.status-active:focus-visible {
-    outline: 2px solid #22c55e;
-    outline-offset: 2px;
-}
-
-.status-inactive:focus-visible {
-    outline: 2px solid #ef4444;
-    outline-offset: 2px;
-}
-
-.action-btn {
-    @apply p-2 rounded-lg text-muted-foreground hover:text-foreground transition-all hover:scale-110;
-}
-
-.action-btn-edit {
-    @apply hover:bg-blue-100 dark:hover:bg-blue-900/20 hover:text-blue-600;
-}
-
-.action-btn-delete {
-    @apply hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600;
-}
-
-.pagination-wrapper {
-    @apply flex justify-center;
-}
-
-/* Modal Animations */
-@keyframes modal-appear {
-    from { 
-        opacity: 0; 
-        transform: scale(0.95) translateY(-10px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
-    }
-}

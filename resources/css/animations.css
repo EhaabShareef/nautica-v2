@@ -9,6 +9,33 @@
   }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { 
+    transform: translateY(2rem); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.4;
+  }
+}
+
 @utility animate-modal {
   animation: modal-appear 0.2s ease-out;
 }
