@@ -12,6 +12,7 @@ use App\Models\Vessel;
 use App\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
