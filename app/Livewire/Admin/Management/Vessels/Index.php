@@ -32,9 +32,6 @@ class Index extends Component
     public $eligibleClients = [];
     public $showClientDropdown = false;
     
-    // Deactivation confirmation
-    public $showDeactivateModal = false;
-    public $deactivateVesselId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -48,6 +45,12 @@ class Index extends Component
     public function mount()
     {
         $this->dispatch('vesselsPageLoaded');
+    }
+
+    #[On('vesselStatusChanged')]
+    public function refreshTable()
+    {
+        // This will cause the component to re-render and refresh the vessels table
     }
 
     #[On('filtersUpdated')]
@@ -299,24 +302,12 @@ class Index extends Component
 
     public function confirmDeactivate($vesselId)
     {
-        $this->deactivateVesselId = $vesselId;
-        $this->showDeactivateModal = true;
+        $this->dispatch('openVesselDeactivate', $vesselId);
     }
 
-    public function cancelDeactivate()
+    public function confirmReactivate($vesselId)
     {
-        $this->showDeactivateModal = false;
-        $this->deactivateVesselId = null;
-    }
-
-    public function deactivateVessel()
-    {
-        $vessel = Vessel::find($this->deactivateVesselId);
-        if ($vessel) {
-            $vessel->update(['is_active' => false]);
-            $this->cancelDeactivate();
-            session()->flash('message', 'Vessel deactivated successfully.');
-        }
+        $this->dispatch('openVesselReactivate', $vesselId);
     }
 
     public function render()

@@ -313,14 +313,9 @@
                         <tr class="table-row group" wire:loading.remove>
                             {{-- Vessel Column --}}
                             <td class="table-cell">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                                        {{ substr($vessel->name, 0, 1) }}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="font-medium text-foreground truncate">{{ $vessel->name }}</div>
-                                        <div class="text-xs text-muted-foreground truncate">{{ $vessel->registration_number }}</div>
-                                    </div>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-foreground truncate">{{ $vessel->name }}</div>
+                                    <div class="text-xs text-muted-foreground truncate">{{ $vessel->registration_number }}</div>
                                 </div>
                             </td>
 
@@ -420,33 +415,17 @@
                                         </button>
                                     @endcan
                                     
-                                    @can('assignRenter', $vessel)
-                                        @if(!$vessel->renter_client_id)
-                                            <button wire:click="$dispatch('vessel-assign-renter:show', {{ $vessel->id }})"
-                                                    class="action-btn hover:bg-purple-100 dark:hover:bg-purple-900/20 hover:text-purple-600"
-                                                    title="Quick Assign Renter">
-                                                <x-heroicon name="user-plus" class="w-4 h-4" />
-                                            </button>
-                                        @else
-                                            <button wire:click="$dispatch('vessel-assign-renter:show', {{ $vessel->id }})"
-                                                    class="action-btn hover:bg-blue-100 dark:hover:bg-blue-900/20 hover:text-blue-600"
-                                                    title="Change Renter">
-                                                <x-heroicon name="arrow-path-rounded-square" class="w-4 h-4" />
-                                            </button>
-                                        @endif
-                                    @endcan
-                                    
                                     @can('toggleStatus', $vessel)
                                         @if($vessel->is_active)
-                                            <button wire:click="$dispatch('vessel-status-toggle:show', {{ $vessel->id }}, 'deactivate')"
+                                            <button wire:click="confirmDeactivate('{{ $vessel->id }}')"
                                                     class="action-btn hover:bg-yellow-100 dark:hover:bg-yellow-900/20 hover:text-yellow-600"
                                                     title="Deactivate Vessel">
                                                 <x-heroicon name="pause-circle" class="w-4 h-4" />
                                             </button>
                                         @else
-                                            <button wire:click="$dispatch('vessel-status-toggle:show', {{ $vessel->id }}, 'activate')"
+                                            <button wire:click="confirmReactivate('{{ $vessel->id }}')"
                                                     class="action-btn hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600"
-                                                    title="Activate Vessel">
+                                                    title="Reactivate Vessel">
                                                 <x-heroicon name="play-circle" class="w-4 h-4" />
                                             </button>
                                         @endif
@@ -506,8 +485,8 @@
     {{-- Child Components --}}
     @livewire('admin.management.vessels.vessel-form')
     @livewire('admin.management.vessels.vessel-delete')
-    @livewire('admin.management.vessels.vessel-assign-renter')
-    @livewire('admin.management.vessels.vessel-status-toggle')
+    @livewire('admin.management.vessels.vessel-deactivate')
+    @livewire('admin.management.vessels.vessel-reactivate')
 </div>
 
 {{-- Toast Notifications --}}
@@ -515,26 +494,14 @@
 document.addEventListener('livewire:init', () => {
     Livewire.on('vesselSaved', (event) => {
         console.log(event.message);
-        // Refresh the vessels list
-        location.reload();
     });
 
     Livewire.on('vesselDeleted', (event) => {
         console.log(event.message);
-        // Refresh the vessels list
-        location.reload();
     });
 
-    Livewire.on('vessel-assigned', (event) => {
+    Livewire.on('vesselStatusChanged', (event) => {
         console.log(event.message);
-        // Refresh the vessels list
-        location.reload();
-    });
-
-    Livewire.on('vessel-status-changed', (event) => {
-        console.log(event.message);
-        // Refresh the vessels list
-        location.reload();
     });
     
     Livewire.on('showToast', (event) => {

@@ -31,7 +31,7 @@ return [
      */
     'vessels' => [
         'search_limit' => (int) env('VESSEL_SEARCH_LIMIT', 20),
-        'allow_owner_renter_same' => (bool) env('VESSEL_ALLOW_OWNER_RENTER_SAME', false),
+        'allow_owner_renter_same' => (bool) env('VESSEL_ALLOW_OWNER_RENTER_SAME', true),
     ],
 ];
 
