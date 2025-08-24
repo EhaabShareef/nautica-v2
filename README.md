@@ -58,6 +58,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 7. **[Booking Workflow](docs/07_workflow-bookings.md)** - Business processes
 8. **[Billing & Invoicing](docs/08_billing-and-invoicing.md)** - Financial workflows
 9. **[Schedule & Reports](docs/09_schedule-and-reports.md)** - Operational views
+10. **[Style Guide](docs/style-guide.md)** - Design tokens & components
 
 ---
 

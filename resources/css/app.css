@@ -1,9 +1,11 @@
 @import 'tailwindcss';
 
-@theme {
-    --font-sans: 'Figtree', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-}
+/* Custom layers */
+@import './tokens.css';
+@import './components.css';
+@import './utilities.css';
+@import './themes.css';
+@import './animations.css';
 
 /* Global Font Family */
 html, body, * {

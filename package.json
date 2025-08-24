@@ -4,7 +4,9 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "style:fix": "prettier --plugin-search-dir=. --write \"resources/**/*.{js,ts,jsx,tsx,css,scss,html,blade.php,md}\" && stylelint \"resources/css/**/*.css\" --fix",
+        "style:check": "prettier --plugin-search-dir=. --check \"resources/**/*.{js,ts,jsx,tsx,css,scss,html,blade.php,md}\" && stylelint \"resources/css/**/*.css\" && if command -v rg >/dev/null 2>&1; then if rg 'style=' -n resources/views; then echo 'Inline styles found'; exit 1; fi; else echo 'ripgrep not found; skipping inline-style check'; fi"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
@@ -14,7 +16,12 @@
         "laravel-vite-plugin": "^2.0.0",
         "postcss": "^8.5.6",
         "tailwindcss": "^4.1.12",
-        "vite": "^7.0.4"
+        "vite": "^7.0.4",
+        "prettier": "^3.2.5",
+        "prettier-plugin-tailwindcss": "^0.5.11",
+        "stylelint": "^16.6.1",
+        "stylelint-config-standard": "^36.0.0",
+        "stylelint-config-tailwindcss": "^0.0.7"
     },
     "dependencies": {
         "alpinejs": "^3.14.9",
