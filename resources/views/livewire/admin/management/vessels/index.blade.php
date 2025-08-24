@@ -89,7 +89,64 @@
     <div class="card slide-up" style="animation-delay: 0.2s;">
         {{-- Action Bar --}}
         <div class="p-4 sm:p-6 border-b border-border">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {{-- Mobile Layout: Two rows --}}
+            <div class="flex flex-col gap-4 md:hidden">
+                {{-- First Row: Search Input (full width on mobile) --}}
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <x-heroicon name="magnifying-glass" class="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <input type="text" 
+                           wire:model.live.debounce.300ms="search"
+                           placeholder="Search vessels..." 
+                           class="form-input pl-10 w-full text-sm rounded-lg transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                           style="height: 42px;">
+                </div>
+
+                {{-- Second Row: Filter Toggle + Per Page + Add Button --}}
+                <div class="flex items-center justify-between gap-3">
+                    {{-- Filter Toggle Button --}}
+                    <button wire:click="toggleFilters" 
+                            class="px-4 py-3 text-sm rounded-lg border border-border bg-secondary text-foreground hover:bg-muted/50 transition-all inline-flex items-center gap-2 whitespace-nowrap"
+                            style="height: 42px;">
+                        <x-heroicon name="funnel" class="w-4 h-4" />
+                        <span class="hidden sm:inline">Filters</span>
+                        @if(!empty($ownerSearch) || !empty($renterSearch) || $statusFilter !== 'all' || $typeFilter !== 'all')
+                            <span class="bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                                {{ collect([!empty($ownerSearch), !empty($renterSearch), $statusFilter !== 'all', $typeFilter !== 'all'])->filter()->count() }}
+                            </span>
+                        @endif
+                    </button>
+
+                    {{-- Actions --}}
+                    <div class="flex items-center gap-3">
+                        {{-- Per Page Selector --}}
+                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span class="hidden sm:inline">Show:</span>
+                            <select wire:model.live="perPage" class="form-input text-sm rounded-lg" style="height: 42px;">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+
+                        {{-- Add Vessel Button --}}
+                        @can('create', \App\Models\Vessel::class)
+                            <button wire:click="createVessel" 
+                                    class="px-4 py-3 text-sm rounded-lg border-0 bg-primary text-primary-foreground hover:opacity-90 hover:transform hover:-translate-y-0.5 transition-all shadow-sm inline-flex items-center gap-2"
+                                    style="height: 42px;">
+                                <x-heroicon name="plus" class="w-4 h-4" />
+                                <span class="hidden sm:inline">Add Vessel</span>
+                                <span class="sm:hidden">Add</span>
+                            </button>
+                        @endcan
+                    </div>
+                </div>
+            </div>
+
+            {{-- Desktop/Tablet Layout: Single row for medium and large devices --}}
+            <div class="hidden md:flex md:items-center md:justify-between gap-4">
                 {{-- Search and Filters --}}
                 <div class="flex flex-col sm:flex-row gap-3 flex-1 max-w-2xl">
                     {{-- Search Input --}}
@@ -100,17 +157,19 @@
                         <input type="text" 
                                wire:model.live.debounce.300ms="search"
                                placeholder="Search vessels..." 
-                               class="input pl-10 w-full">
+                               class="form-input pl-10 w-full text-sm rounded-lg transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                               style="height: 42px;">
                     </div>
 
                     {{-- Filter Button --}}
                     <button wire:click="toggleFilters" 
-                            class="btn-secondary inline-flex items-center gap-2 px-4 py-2.5 whitespace-nowrap">
+                            class="px-4 py-3 text-sm rounded-lg border border-border bg-secondary text-foreground hover:bg-muted/50 transition-all inline-flex items-center gap-2 whitespace-nowrap"
+                            style="height: 42px;">
                         <x-heroicon name="funnel" class="w-4 h-4" />
                         Filters
-                        @if($ownerFilter !== 'all' || $renterFilter !== 'all' || $statusFilter !== 'all' || $typeFilter !== 'all')
+                        @if(!empty($ownerSearch) || !empty($renterSearch) || $statusFilter !== 'all' || $typeFilter !== 'all')
                             <span class="bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                                {{ collect([$ownerFilter !== 'all', $renterFilter !== 'all', $statusFilter !== 'all', $typeFilter !== 'all'])->filter()->count() }}
+                                {{ collect([!empty($ownerSearch), !empty($renterSearch), $statusFilter !== 'all', $typeFilter !== 'all'])->filter()->count() }}
                             </span>
                         @endif
                     </button>
@@ -121,7 +180,7 @@
                     {{-- Per Page Selector --}}
                     <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <span class="hidden sm:inline">Show:</span>
-                        <select wire:model.live="perPage" class="input-sm py-1">
+                        <select wire:model.live="perPage" class="form-input text-sm rounded-lg" style="height: 42px;">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
@@ -132,7 +191,8 @@
                     {{-- Add Vessel Button --}}
                     @can('create', \App\Models\Vessel::class)
                         <button wire:click="createVessel" 
-                                class="btn inline-flex items-center gap-2 px-4 py-2.5">
+                                class="px-4 py-3 text-sm rounded-lg border-0 bg-primary text-primary-foreground hover:opacity-90 hover:transform hover:-translate-y-0.5 transition-all shadow-sm inline-flex items-center gap-2"
+                                style="height: 42px;">
                             <x-heroicon name="plus" class="w-4 h-4" />
                             <span class="hidden sm:inline">Add Vessel</span>
                             <span class="sm:hidden">Add</span>
@@ -145,33 +205,28 @@
             @if($showFilters)
                 <div class="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {{-- Owner Filter --}}
+                        {{-- Owner Search Filter --}}
                         <div>
                             <label class="block text-sm font-medium text-foreground mb-1">Owner</label>
-                            <select wire:model.live="ownerFilter" class="input-sm w-full">
-                                <option value="all">All Owners</option>
-                                @foreach($owners as $owner)
-                                    <option value="{{ $owner->id }}">{{ $owner->name }}</option>
-                                @endforeach
-                            </select>
+                            <input type="text" 
+                                   wire:model.live.debounce.300ms="ownerSearch"
+                                   placeholder="Search by owner name..."
+                                   class="form-input w-full text-sm rounded-lg transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                         </div>
 
-                        {{-- Renter Filter --}}
+                        {{-- Renter Search Filter --}}
                         <div>
                             <label class="block text-sm font-medium text-foreground mb-1">Renter</label>
-                            <select wire:model.live="renterFilter" class="input-sm w-full">
-                                <option value="all">All</option>
-                                <option value="none">No Renter</option>
-                                @foreach($renters as $renter)
-                                    <option value="{{ $renter->id }}">{{ $renter->name }}</option>
-                                @endforeach
-                            </select>
+                            <input type="text" 
+                                   wire:model.live.debounce.300ms="renterSearch"
+                                   placeholder="Search by renter name..."
+                                   class="form-input w-full text-sm rounded-lg transition-all focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                         </div>
 
                         {{-- Status Filter --}}
                         <div>
                             <label class="block text-sm font-medium text-foreground mb-1">Status</label>
-                            <select wire:model.live="statusFilter" class="input-sm w-full">
+                            <select wire:model.live="statusFilter" class="form-input w-full text-sm rounded-lg">
                                 <option value="all">All Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
@@ -181,7 +236,7 @@
                         {{-- Type Filter --}}
                         <div>
                             <label class="block text-sm font-medium text-foreground mb-1">Type</label>
-                            <select wire:model.live="typeFilter" class="input-sm w-full">
+                            <select wire:model.live="typeFilter" class="form-input w-full text-sm rounded-lg">
                                 <option value="all">All Types</option>
                                 @foreach($vesselTypes as $type)
                                     <option value="{{ $type }}">{{ $type }}</option>
@@ -367,13 +422,13 @@
                                     
                                     @can('assignRenter', $vessel)
                                         @if(!$vessel->renter_client_id)
-                                            <button wire:click="openQuickAssign('{{ $vessel->id }}')"
+                                            <button wire:click="$dispatch('vessel-assign-renter:show', {{ $vessel->id }})"
                                                     class="action-btn hover:bg-purple-100 dark:hover:bg-purple-900/20 hover:text-purple-600"
                                                     title="Quick Assign Renter">
                                                 <x-heroicon name="user-plus" class="w-4 h-4" />
                                             </button>
                                         @else
-                                            <button wire:click="openQuickAssign('{{ $vessel->id }}')"
+                                            <button wire:click="$dispatch('vessel-assign-renter:show', {{ $vessel->id }})"
                                                     class="action-btn hover:bg-blue-100 dark:hover:bg-blue-900/20 hover:text-blue-600"
                                                     title="Change Renter">
                                                 <x-heroicon name="arrow-path-rounded-square" class="w-4 h-4" />
@@ -383,13 +438,13 @@
                                     
                                     @can('toggleStatus', $vessel)
                                         @if($vessel->is_active)
-                                            <button wire:click="confirmDeactivate('{{ $vessel->id }}')"
+                                            <button wire:click="$dispatch('vessel-status-toggle:show', {{ $vessel->id }}, 'deactivate')"
                                                     class="action-btn hover:bg-yellow-100 dark:hover:bg-yellow-900/20 hover:text-yellow-600"
                                                     title="Deactivate Vessel">
                                                 <x-heroicon name="pause-circle" class="w-4 h-4" />
                                             </button>
                                         @else
-                                            <button wire:click="toggleVesselStatus('{{ $vessel->id }}')"
+                                            <button wire:click="$dispatch('vessel-status-toggle:show', {{ $vessel->id }}, 'activate')"
                                                     class="action-btn hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600"
                                                     title="Activate Vessel">
                                                 <x-heroicon name="play-circle" class="w-4 h-4" />
@@ -451,125 +506,8 @@
     {{-- Child Components --}}
     @livewire('admin.management.vessels.vessel-form')
     @livewire('admin.management.vessels.vessel-delete')
-
-    {{-- Quick Assign Renter Modal --}}
-    @if($showQuickAssignModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="quick-assign-title" role="dialog" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="closeQuickAssign"></div>
-                
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-modal">
-                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 sm:mx-0 sm:h-10 sm:w-10">
-                                <x-heroicon name="user-plus" class="h-6 w-6 text-purple-600" />
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="quick-assign-title">
-                                    Quick Assign Renter
-                                </h3>
-                                <div class="mt-4">
-                                    {{-- Quick Assign Owner Button --}}
-                                    @php
-                                        $vessel = $vessels->find($quickAssignVesselId);
-                                    @endphp
-                                    @if($vessel && $vessel->owner && $vessel->owner->id != $vessel->renter_client_id)
-                                        <button wire:click="assignOwnerAsRenter" 
-                                                class="w-full mb-4 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors">
-                                            <div class="flex items-center justify-center gap-2">
-                                                <x-heroicon name="user" class="w-4 h-4" />
-                                                Assign Owner as Renter ({{ $vessel->owner->display_name }})
-                                            </div>
-                                        </button>
-                                    @endif
-                                    
-                                    {{-- Search for Other Clients --}}
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Or search for a different client:
-                                    </label>
-                                    <div class="relative" x-data="{ open: @entangle('showClientDropdown') }">
-                                        <input type="text" 
-                                               wire:model.live.debounce.300ms="quickAssignSearch"
-                                               @focus="open = true"
-                                               class="form-input w-full"
-                                               placeholder="Search by name or ID...">
-                                        
-                                        @if($showClientDropdown && count($eligibleClients) > 0)
-                                            <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                                @foreach($eligibleClients as $client)
-                                                    <button type="button" 
-                                                            wire:click="assignClientAsRenter({{ $client['id'] }})"
-                                                            class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                                                        <div class="w-6 h-6 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                                                            {{ substr($client['display_name'], 0, 1) }}
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-sm font-medium">{{ $client['display_name'] }}</div>
-                                                            @if($client['id_card'])
-                                                                <div class="text-xs text-muted-foreground">ID: {{ $client['id_card'] }}</div>
-                                                            @endif
-                                                        </div>
-                                                    </button>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="button" 
-                                wire:click="closeQuickAssign"
-                                class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-700">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    {{-- Deactivate Confirmation Modal --}}
-    @if($showDeactivateModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="deactivate-title" role="dialog" aria-modal="true">
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="cancelDeactivate"></div>
-                
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-modal">
-                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/20 sm:mx-0 sm:h-10 sm:w-10">
-                                <x-heroicon name="exclamation-triangle" class="h-6 w-6 text-yellow-600" />
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="deactivate-title">
-                                    Deactivate Vessel
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Are you sure you want to deactivate this vessel? This action will make it unavailable for new bookings.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="button" 
-                                wire:click="deactivateVessel"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Deactivate
-                        </button>
-                        <button type="button" 
-                                wire:click="cancelDeactivate"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-700">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    @livewire('admin.management.vessels.vessel-assign-renter')
+    @livewire('admin.management.vessels.vessel-status-toggle')
 </div>
 
 {{-- Toast Notifications --}}
@@ -577,10 +515,26 @@
 document.addEventListener('livewire:init', () => {
     Livewire.on('vesselSaved', (event) => {
         console.log(event.message);
+        // Refresh the vessels list
+        location.reload();
     });
 
     Livewire.on('vesselDeleted', (event) => {
         console.log(event.message);
+        // Refresh the vessels list
+        location.reload();
+    });
+
+    Livewire.on('vessel-assigned', (event) => {
+        console.log(event.message);
+        // Refresh the vessels list
+        location.reload();
+    });
+
+    Livewire.on('vessel-status-changed', (event) => {
+        console.log(event.message);
+        // Refresh the vessels list
+        location.reload();
     });
     
     Livewire.on('showToast', (event) => {

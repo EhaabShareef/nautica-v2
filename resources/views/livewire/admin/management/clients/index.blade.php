@@ -31,14 +31,16 @@
     {{-- Main Content Card --}}
     <div class="card slide-up" style="animation-delay: 0.2s;">
         {{-- Action Bar --}}
-        @livewire('admin.management.clients.components.search-bar', [
-            'search' => $search,
-            'statusFilter' => $statusFilter,
-            'perPage' => $perPage
-        ])
+        <div class="p-4 sm:p-6 border-b border-border">
+            @livewire('admin.management.clients.components.search-bar', [
+                'search' => $search,
+                'statusFilter' => $statusFilter,
+                'perPage' => $perPage
+            ])
+        </div>
 
         {{-- Table Container --}}
-        <div class="overflow-x-auto rounded-2xl border" style="border-color: var(--border); background: var(--card);">
+        <div class="overflow-x-auto rounded-b-2xl" style="background: var(--card);">
             <table class="min-w-full text-sm">
                 <thead style="background: color-mix(in oklab, var(--muted) 60%, transparent); color: var(--muted-foreground);">
                     <tr class="border-b" style="border-color: var(--border);">
