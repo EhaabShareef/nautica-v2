@@ -366,19 +366,35 @@
                                     @endcan
                                     
                                     @can('assignRenter', $vessel)
-                                        <button wire:click="assignRenter('{{ $vessel->id }}')"
-                                                class="action-btn hover:bg-purple-100 dark:hover:bg-purple-900/20 hover:text-purple-600"
-                                                title="Assign Renter">
-                                            <x-heroicon name="user-plus" class="w-4 h-4" />
-                                        </button>
+                                        @if(!$vessel->renter_client_id)
+                                            <button wire:click="openQuickAssign('{{ $vessel->id }}')"
+                                                    class="action-btn hover:bg-purple-100 dark:hover:bg-purple-900/20 hover:text-purple-600"
+                                                    title="Quick Assign Renter">
+                                                <x-heroicon name="user-plus" class="w-4 h-4" />
+                                            </button>
+                                        @else
+                                            <button wire:click="openQuickAssign('{{ $vessel->id }}')"
+                                                    class="action-btn hover:bg-blue-100 dark:hover:bg-blue-900/20 hover:text-blue-600"
+                                                    title="Change Renter">
+                                                <x-heroicon name="arrow-path-rounded-square" class="w-4 h-4" />
+                                            </button>
+                                        @endif
                                     @endcan
                                     
                                     @can('toggleStatus', $vessel)
-                                        <button wire:click="toggleVesselStatus('{{ $vessel->id }}')"
-                                                class="action-btn hover:bg-{{ $vessel->is_active ? 'yellow' : 'green' }}-100 dark:hover:bg-{{ $vessel->is_active ? 'yellow' : 'green' }}-900/20 hover:text-{{ $vessel->is_active ? 'yellow' : 'green' }}-600"
-                                                title="{{ $vessel->is_active ? 'Deactivate' : 'Activate' }} Vessel">
-                                            <x-heroicon name="{{ $vessel->is_active ? 'pause-circle' : 'play-circle' }}" class="w-4 h-4" />
-                                        </button>
+                                        @if($vessel->is_active)
+                                            <button wire:click="confirmDeactivate('{{ $vessel->id }}')"
+                                                    class="action-btn hover:bg-yellow-100 dark:hover:bg-yellow-900/20 hover:text-yellow-600"
+                                                    title="Deactivate Vessel">
+                                                <x-heroicon name="pause-circle" class="w-4 h-4" />
+                                            </button>
+                                        @else
+                                            <button wire:click="toggleVesselStatus('{{ $vessel->id }}')"
+                                                    class="action-btn hover:bg-green-100 dark:hover:bg-green-900/20 hover:text-green-600"
+                                                    title="Activate Vessel">
+                                                <x-heroicon name="play-circle" class="w-4 h-4" />
+                                            </button>
+                                        @endif
                                     @endcan
                                     
                                     @can('delete', $vessel)
@@ -435,6 +451,125 @@
     {{-- Child Components --}}
     @livewire('admin.management.vessels.vessel-form')
     @livewire('admin.management.vessels.vessel-delete')
+
+    {{-- Quick Assign Renter Modal --}}
+    @if($showQuickAssignModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="quick-assign-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="closeQuickAssign"></div>
+                
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-modal">
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 sm:mx-0 sm:h-10 sm:w-10">
+                                <x-heroicon name="user-plus" class="h-6 w-6 text-purple-600" />
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="quick-assign-title">
+                                    Quick Assign Renter
+                                </h3>
+                                <div class="mt-4">
+                                    {{-- Quick Assign Owner Button --}}
+                                    @php
+                                        $vessel = $vessels->find($quickAssignVesselId);
+                                    @endphp
+                                    @if($vessel && $vessel->owner && $vessel->owner->id != $vessel->renter_client_id)
+                                        <button wire:click="assignOwnerAsRenter" 
+                                                class="w-full mb-4 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <x-heroicon name="user" class="w-4 h-4" />
+                                                Assign Owner as Renter ({{ $vessel->owner->display_name }})
+                                            </div>
+                                        </button>
+                                    @endif
+                                    
+                                    {{-- Search for Other Clients --}}
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Or search for a different client:
+                                    </label>
+                                    <div class="relative" x-data="{ open: @entangle('showClientDropdown') }">
+                                        <input type="text" 
+                                               wire:model.live.debounce.300ms="quickAssignSearch"
+                                               @focus="open = true"
+                                               class="form-input w-full"
+                                               placeholder="Search by name or ID...">
+                                        
+                                        @if($showClientDropdown && count($eligibleClients) > 0)
+                                            <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                                @foreach($eligibleClients as $client)
+                                                    <button type="button" 
+                                                            wire:click="assignClientAsRenter({{ $client['id'] }})"
+                                                            class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                        <div class="w-6 h-6 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+                                                            {{ substr($client['display_name'], 0, 1) }}
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-sm font-medium">{{ $client['display_name'] }}</div>
+                                                            @if($client['id_card'])
+                                                                <div class="text-xs text-muted-foreground">ID: {{ $client['id_card'] }}</div>
+                                                            @endif
+                                                        </div>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" 
+                                wire:click="closeQuickAssign"
+                                class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-700">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Deactivate Confirmation Modal --}}
+    @if($showDeactivateModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="deactivate-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="cancelDeactivate"></div>
+                
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-modal">
+                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900/20 sm:mx-0 sm:h-10 sm:w-10">
+                                <x-heroicon name="exclamation-triangle" class="h-6 w-6 text-yellow-600" />
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="deactivate-title">
+                                    Deactivate Vessel
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        Are you sure you want to deactivate this vessel? This action will make it unavailable for new bookings.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" 
+                                wire:click="deactivateVessel"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Deactivate
+                        </button>
+                        <button type="button" 
+                                wire:click="cancelDeactivate"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-700">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 {{-- Toast Notifications --}}

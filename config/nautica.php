@@ -23,9 +23,15 @@ return [
         ],
     ],
 
+    /**
+     * Vessel Management Configuration
+     * 
+     * search_limit: Maximum number of clients returned in search results (min: 1, recommended: 10-50)
+     * allow_owner_renter_same: Whether a vessel owner can also be the renter of the same vessel
+     */
     'vessels' => [
-        'search_limit' => env('VESSEL_SEARCH_LIMIT', 20),
-        'allow_owner_renter_same' => env('VESSEL_ALLOW_OWNER_RENTER_SAME', false),
+        'search_limit' => (int) env('VESSEL_SEARCH_LIMIT', 20),
+        'allow_owner_renter_same' => (bool) env('VESSEL_ALLOW_OWNER_RENTER_SAME', false),
     ],
 ];
 

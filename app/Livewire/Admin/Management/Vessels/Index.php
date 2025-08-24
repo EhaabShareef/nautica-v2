@@ -24,6 +24,17 @@ class Index extends Component
 
     // Component state
     public $showFilters = false;
+    
+    // Quick assign renter modal
+    public $showQuickAssignModal = false;
+    public $quickAssignVesselId = null;
+    public $quickAssignSearch = '';
+    public $eligibleClients = [];
+    public $showClientDropdown = false;
+    
+    // Deactivation confirmation
+    public $showDeactivateModal = false;
+    public $deactivateVesselId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -139,7 +150,7 @@ class Index extends Component
 
     public function getVesselsProperty()
     {
-        $query = Vessel::with(['owner:id,name,email,id_card', 'renter:id,name,email,id_card'])
+        $query = Vessel::with(['owner:id,name,id_card', 'renter:id,name,id_card'])
             ->select(['id', 'name', 'registration_number', 'type', 'owner_client_id', 'renter_client_id', 'length', 'width', 'draft', 'is_active', 'created_at', 'updated_at']);
 
         // Apply search
@@ -150,11 +161,11 @@ class Index extends Component
                   ->orWhere('type', 'like', '%' . $this->search . '%')
                   ->orWhereHas('owner', function ($q) {
                       $q->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                        ->orWhere('id_card', 'like', '%' . $this->search . '%');
                   })
                   ->orWhereHas('renter', function ($q) {
                       $q->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                        ->orWhere('id_card', 'like', '%' . $this->search . '%');
                   });
             });
         }
@@ -216,6 +227,96 @@ class Index extends Component
             ->distinct()
             ->orderBy('type')
             ->pluck('type');
+    }
+
+    public function openQuickAssign($vesselId)
+    {
+        $this->quickAssignVesselId = $vesselId;
+        $this->showQuickAssignModal = true;
+        $this->quickAssignSearch = '';
+        $this->loadEligibleClients();
+    }
+
+    public function closeQuickAssign()
+    {
+        $this->showQuickAssignModal = false;
+        $this->quickAssignVesselId = null;
+        $this->quickAssignSearch = '';
+        $this->eligibleClients = [];
+        $this->showClientDropdown = false;
+    }
+
+    public function updatedQuickAssignSearch()
+    {
+        $this->showClientDropdown = !empty($this->quickAssignSearch);
+        if (!empty($this->quickAssignSearch)) {
+            $this->loadEligibleClients();
+        }
+    }
+
+    public function assignOwnerAsRenter()
+    {
+        $vessel = Vessel::with('owner')->find($this->quickAssignVesselId);
+        if ($vessel && $vessel->owner) {
+            $this->assignClientAsRenter($vessel->owner->id);
+        }
+    }
+
+    public function assignClientAsRenter($clientId)
+    {
+        $vessel = Vessel::find($this->quickAssignVesselId);
+        if ($vessel) {
+            $vessel->update(['renter_client_id' => $clientId]);
+            $this->closeQuickAssign();
+            $this->dispatch('vessel-updated');
+            session()->flash('message', 'Renter assigned successfully.');
+        }
+    }
+
+    public function loadEligibleClients()
+    {
+        $query = User::clients()
+            ->active()
+            ->notBlacklisted()
+            ->select(['id', 'name', 'id_card'])
+            ->orderBy('name');
+
+        if (!empty($this->quickAssignSearch)) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->quickAssignSearch . '%')
+                  ->orWhere('id_card', 'like', '%' . $this->quickAssignSearch . '%');
+            });
+        }
+
+        $this->eligibleClients = $query->limit(20)->get()->map(function ($client) {
+            return [
+                'id' => $client->id,
+                'display_name' => $client->display_name,
+                'id_card' => $client->id_card,
+            ];
+        })->toArray();
+    }
+
+    public function confirmDeactivate($vesselId)
+    {
+        $this->deactivateVesselId = $vesselId;
+        $this->showDeactivateModal = true;
+    }
+
+    public function cancelDeactivate()
+    {
+        $this->showDeactivateModal = false;
+        $this->deactivateVesselId = null;
+    }
+
+    public function deactivateVessel()
+    {
+        $vessel = Vessel::find($this->deactivateVesselId);
+        if ($vessel) {
+            $vessel->update(['is_active' => false]);
+            $this->cancelDeactivate();
+            session()->flash('message', 'Vessel deactivated successfully.');
+        }
     }
 
     public function render()

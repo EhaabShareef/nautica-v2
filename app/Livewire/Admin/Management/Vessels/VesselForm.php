@@ -35,6 +35,9 @@ class VesselForm extends Component
     public $showOwnerDropdown = false;
     public $showRenterDropdown = false;
     
+    // Owner/Renter same toggle
+    public $ownerIsSameAsRenter = false;
+    
     public $eligibleOwners = [];
     public $eligibleRenters = [];
     public $vesselTypes = [];
@@ -68,7 +71,7 @@ class VesselForm extends Component
     public function mount()
     {
         $this->loadVesselTypes();
-        $this->loadEligibleClients();
+        $this->loadEligibleClients('', '');
     }
 
     #[On('openVesselForm')]
@@ -103,6 +106,9 @@ class VesselForm extends Component
         // Set search values for display
         $this->ownerSearch = $vessel->owner ? $vessel->owner->display_name : '';
         $this->renterSearch = $vessel->renter ? $vessel->renter->display_name : '';
+        
+        // Set toggle if owner and renter are the same
+        $this->ownerIsSameAsRenter = $vessel->owner_client_id && $vessel->owner_client_id === $vessel->renter_client_id;
     }
 
     public function resetForm()
@@ -124,6 +130,7 @@ class VesselForm extends Component
         $this->renterSearch = '';
         $this->showOwnerDropdown = false;
         $this->showRenterDropdown = false;
+        $this->ownerIsSameAsRenter = false;
         
         $this->resetErrorBag();
     }
@@ -138,7 +145,7 @@ class VesselForm extends Component
     public function updatedOwnerSearch()
     {
         $this->showOwnerDropdown = !empty($this->ownerSearch);
-        $this->loadEligibleClients($this->ownerSearch);
+        $this->loadEligibleClients($this->ownerSearch, null);
         
         // Clear selected owner if search doesn't match
         if ($this->owner_client_id) {
@@ -153,7 +160,7 @@ class VesselForm extends Component
     public function updatedRenterSearch()
     {
         $this->showRenterDropdown = !empty($this->renterSearch);
-        $this->loadEligibleClients('', $this->renterSearch);
+        $this->loadEligibleClients(null, $this->renterSearch);
         
         // Clear selected renter if search doesn't match
         if ($this->renter_client_id) {
@@ -186,6 +193,30 @@ class VesselForm extends Component
         $this->renter_client_id = null;
         $this->renterSearch = '';
         $this->showRenterDropdown = false;
+        $this->ownerIsSameAsRenter = false;
+    }
+
+    public function updatedOwnerIsSameAsRenter()
+    {
+        if ($this->ownerIsSameAsRenter) {
+            // Set renter same as owner
+            $this->renter_client_id = $this->owner_client_id;
+            $this->renterSearch = $this->ownerSearch;
+            $this->showRenterDropdown = false;
+        } else {
+            // Clear renter when unchecked
+            $this->renter_client_id = null;
+            $this->renterSearch = '';
+        }
+    }
+
+    public function updatedOwnerClientId()
+    {
+        // Update renter if toggle is on
+        if ($this->ownerIsSameAsRenter) {
+            $this->renter_client_id = $this->owner_client_id;
+            $this->renterSearch = $this->ownerSearch;
+        }
     }
 
     public function loadVesselTypes()
@@ -202,25 +233,29 @@ class VesselForm extends Component
             ->toArray();
     }
 
-    public function loadEligibleClients($ownerSearch = '', $renterSearch = '')
+    public function loadEligibleClients($ownerSearch = null, $renterSearch = null)
     {
-        $this->eligibleOwners = $this->vesselService->getEligibleClients($ownerSearch)
-            ->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'display_name' => $client->display_name,
-                    'id_card' => $client->id_card,
-                ];
-            })->toArray();
+        if ($ownerSearch !== null) {
+            $this->eligibleOwners = $this->vesselService->getEligibleClients($ownerSearch)
+                ->map(function ($client) {
+                    return [
+                        'id' => $client->id,
+                        'display_name' => $client->display_name,
+                        'id_card' => $client->id_card,
+                    ];
+                })->toArray();
+        }
 
-        $this->eligibleRenters = $this->vesselService->getEligibleClients($renterSearch)
-            ->map(function ($client) {
-                return [
-                    'id' => $client->id,
-                    'display_name' => $client->display_name,
-                    'id_card' => $client->id_card,
-                ];
-            })->toArray();
+        if ($renterSearch !== null) {
+            $this->eligibleRenters = $this->vesselService->getEligibleClients($renterSearch)
+                ->map(function ($client) {
+                    return [
+                        'id' => $client->id,
+                        'display_name' => $client->display_name,
+                        'id_card' => $client->id_card,
+                    ];
+                })->toArray();
+        }
     }
 
     public function addSpecification()

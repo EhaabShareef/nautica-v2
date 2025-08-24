@@ -49,30 +49,30 @@ class VesselService
      */
     protected function validateVesselData(array $data, Vessel $vessel): void
     {
-        $rules = $vessel->getValidationRules(!$vessel->exists);
+        $rules = $vessel->getValidationRules($vessel->exists);
         $validator = Validator::make($data, $rules);
 
         $validator->after(function ($validator) use ($data) {
             // Validate owner eligibility
             if (isset($data['owner_client_id'])) {
                 $owner = User::find($data['owner_client_id']);
-                if (!$this->isClientEligible($owner)) {
-                    $validator->errors()->add('owner_client_id', 'Selected owner is inactive or blacklisted.');
+                if (!$owner) {
+                    $validator->errors()->add('owner_client_id', 'Selected owner does not exist.');
+                } elseif (!$this->isClientEligible($owner)) {
+                    $validator->errors()->add('owner_client_id', 'Selected owner is inactive, blacklisted, or not a client.');
                 }
             }
 
             // Validate renter eligibility if provided
             if (!empty($data['renter_client_id'])) {
                 $renter = User::find($data['renter_client_id']);
-                if (!$this->isClientEligible($renter)) {
-                    $validator->errors()->add('renter_client_id', 'Selected renter is inactive or blacklisted.');
+                if (!$renter) {
+                    $validator->errors()->add('renter_client_id', 'Selected renter does not exist.');
+                } elseif (!$this->isClientEligible($renter)) {
+                    $validator->errors()->add('renter_client_id', 'Selected renter is inactive, blacklisted, or not a client.');
                 }
                 
-                // Prevent renter = owner
-                if ($data['renter_client_id'] == $data['owner_client_id']
-                    && !config('nautica.vessels.allow_owner_renter_same', false)) {
-                    $validator->errors()->add('renter_client_id', 'Renter cannot be the same as the owner.');
-                }
+                // Allow owner = renter (removed restriction)
             }
         });
 
@@ -91,7 +91,7 @@ class VesselService
             return false;
         }
 
-        return $client->is_active && !$client->is_blacklisted;
+        return $client->isClient() && $client->is_active && !$client->is_blacklisted;
     }
 
     /**

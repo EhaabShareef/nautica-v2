@@ -121,10 +121,20 @@
                             @enderror
                         </div>
 
-                        {{-- Renter Selection --}}
+                        {{-- Owner Same as Renter Toggle --}}
                         <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" 
+                                       wire:model.live="ownerIsSameAsRenter"
+                                       class="rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Owner is same as renter</span>
+                            </label>
+                        </div>
+
+                        {{-- Renter Selection --}}
+                        <div class="{{ $ownerIsSameAsRenter ? 'opacity-50 pointer-events-none' : '' }}">
                             <label for="renter_search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Renter (Optional)
+                                Renter {{ $ownerIsSameAsRenter ? '(Same as owner)' : '(Optional)' }}
                             </label>
                             <div class="relative" x-data="{ open: @entangle('showRenterDropdown') }">
                                 <div class="flex gap-2">
@@ -132,8 +142,9 @@
                                            id="renter_search"
                                            wire:model.live.debounce.300ms="renterSearch"
                                            @focus="open = true"
-                                           class="form-input flex-1 {{ $errors->has('renter_client_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
-                                           placeholder="Search by name or ID...">
+                                           {{ $ownerIsSameAsRenter ? 'disabled' : '' }}
+                                           class="form-input flex-1 {{ $errors->has('renter_client_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }} {{ $ownerIsSameAsRenter ? 'bg-gray-100 dark:bg-gray-700' : '' }}"
+                                           placeholder="{{ $ownerIsSameAsRenter ? 'Same as owner' : 'Search by name or ID...' }}">
                                     @if($renter_client_id)
                                         <button type="button" 
                                                 wire:click="clearRenter"
