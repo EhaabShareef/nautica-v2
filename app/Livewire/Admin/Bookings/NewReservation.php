@@ -138,21 +138,15 @@ class NewReservation extends Component
 
     public function calculateAvailability(): void
     {
-        $start = Carbon::parse($this->startDate . ' ' . ($this->startTime ?? '00:00'));
-        if ($this->bookingType === 'hourly') {
-            $end = Carbon::parse($this->startDate . ' ' . ($this->endTime ?? '00:00'));
-        } elseif ($this->bookingType === 'monthly') {
-            $end = Carbon::parse($this->startDate)->addMonths((int)($this->duration ?? 1));
-        } elseif ($this->bookingType === 'yearly') {
-            $end = Carbon::parse($this->startDate)->addYears((int)($this->duration ?? 1));
-        } else {
-            $end = Carbon::parse($this->endDate);
-        }
+        // Step-specific validation
+        $this->validate($this->rulesAvailability());
 
-        $this->startDate = $start;
-        $this->endDate = $end;
+        // Derive the window without mutating the bound inputs
+        [$start, $end] = $this->buildStartEndFromInputs();
+        $now = now();
 
-        $slotQuery = Slot::with('zone.block.property')
+        $slotQuery = Slot::query()
+            ->with('zone.block.property')
             ->where('is_active', true);
 
         if ($this->selectedZone) {
@@ -163,24 +157,22 @@ class NewReservation extends Component
             $slotQuery->whereHas('zone.block', fn($q) => $q->where('property_id', $this->selectedProperty));
         }
 
-        $slots = $slotQuery->get();
+        // Exclude slots with overlapping, non-cancelled, non-expired bookings
+        $slotQuery->whereDoesntHave('bookings', function ($q) use ($start, $end, $now) {
+            $q->where('status', '!=', 'cancelled')
+              ->where(function ($q2) use ($start, $end) {
+                  $q2->where('start_date', '<', $end)
+                     ->where('end_date', '>', $start);
+              })
+              ->where(function ($q3) use ($now) {
+                  $q3->whereNull('hold_expires_at')
+                     ->orWhere('hold_expires_at', '>', $now);
+              });
+        });
 
-        $this->availableSlots = $slots->filter(function ($slot) use ($start, $end) {
-            return !Booking::where('slot_id', $slot->id)
-                ->where('status', '!=', 'cancelled')
-                ->where(function ($q) use ($start, $end) {
-                    $q->whereBetween('start_date', [$start, $end])
-                      ->orWhereBetween('end_date', [$start, $end])
-                      ->orWhere(function ($q2) use ($start, $end) {
-                          $q2->where('start_date', '<=', $start)
-                             ->where('end_date', '>=', $end);
-                      });
-                })->exists();
-        })->values();
-
+        $this->availableSlots = $slotQuery->orderBy('code')->get();
         $this->step = 5;
     }
-
     public function createBooking()
     {
         $this->validate([
