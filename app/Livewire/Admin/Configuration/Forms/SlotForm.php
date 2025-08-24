@@ -78,6 +78,12 @@ class SlotForm extends Component
         }
 
         try {
+            $zone = Zone::with('block.property')->find($this->zone_id);
+            if ($this->is_active && $zone && (! $zone->is_active || ! $zone->block->is_active || ! $zone->block->property->is_active)) {
+                session()->flash('error', 'Cannot activate slot because one of its parents is inactive.');
+                return;
+            }
+
             DB::transaction(function () {
                 $data = [
                     'zone_id' => $this->zone_id,
@@ -104,7 +110,7 @@ class SlotForm extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            session()->flash('error', 'Failed to save slot. Please check your input and try again.');
+            session()->flash('error', $e->getMessage() ?: 'Failed to save slot. Please check your input and try again.');
         }
     }
 

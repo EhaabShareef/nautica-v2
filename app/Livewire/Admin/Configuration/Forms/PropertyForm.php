@@ -97,7 +97,7 @@ class PropertyForm extends Component
             ]);
 
             // Flash error message to user
-            session()->flash('error', 'Failed to save property. Please check your input and try again.');
+            session()->flash('error', $e->getMessage() ?: 'Failed to save property. Please check your input and try again.');
 
             // Don't close modal on failure so user can retry
         }
