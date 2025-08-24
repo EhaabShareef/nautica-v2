@@ -17,6 +17,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'config.manage',
             'config.settings.manage',
             'config.roles.manage',
+            'config.view',
+            'clients.view',
             'clients.manage',
             'clients.approve',
             'vessels.view',
@@ -24,8 +26,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'vessels.update',
             'vessels.delete',
             'vessels.assign_renter',
+            'bookings.view',
+            'bookings.create',
             'bookings.manage',
             'bookings.approve',
+            'bookings.logs.create',
             'contracts.manage',
             'invoices.manage',
         ];
@@ -37,11 +42,16 @@ class RolesAndPermissionsSeeder extends Seeder
         $roles = [
             'admin' => $permissions,
             'agent' => [
+                'config.view',
+                'clients.view',
                 'vessels.view',
                 'vessels.create', 
                 'vessels.update',
                 'vessels.assign_renter',
+                'bookings.view',
+                'bookings.create',
                 'bookings.manage', 
+                'bookings.logs.create',
                 'contracts.manage', 
                 'invoices.manage'
             ],

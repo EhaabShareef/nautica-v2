@@ -23,11 +23,11 @@ class NewReservation extends Component
 
     public string $clientSearch = '';
     public $clientResults = [];
-    public ?User $selectedClient = null;
+    public ?int $selectedClientId = null;
 
     public string $vesselSearch = '';
     public $vesselResults = [];
-    public ?Vessel $selectedVessel = null;
+    public ?string $selectedVesselId = null;
 
     public ?string $selectedProperty = null;
     public ?string $selectedBlock = null;
@@ -45,7 +45,7 @@ class NewReservation extends Component
     public $availableSlots;
     public ?string $selectedSlot = null;
 
-    public array $servicesList = [
+    private const SERVICES_LIST = [
         'shore_power' => 'Shore Power',
         'water_hookup' => 'Water Hookup',
         'cleaning' => 'Cleaning',
@@ -56,6 +56,13 @@ class NewReservation extends Component
     {
         $this->properties = Property::where('is_active', true)->get();
         $this->availableSlots = collect();
+        
+        // Initialize date/time fields with defaults
+        $this->startDate = now()->format('Y-m-d');
+        $this->startTime = now()->format('H:i');
+        $this->endTime = now()->addHour()->format('H:i');
+        $this->endDate = now()->addDay()->format('Y-m-d');
+        $this->duration = 1;
     }
 
     public function updatedClientSearch(): void
@@ -65,15 +72,20 @@ class NewReservation extends Component
             return;
         }
 
-        $this->clientResults = User::clients()
-            ->active()
-            ->notBlacklisted()
-            ->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->clientSearch . '%')
-                  ->orWhere('email', 'like', '%' . $this->clientSearch . '%');
-            })
-            ->limit(10)
-            ->get();
+        try {
+            $this->clientResults = User::clients()
+                ->active()
+                ->notBlacklisted()
+                ->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->clientSearch . '%')
+                      ->orWhere('email', 'like', '%' . $this->clientSearch . '%');
+                })
+                ->limit(10)
+                ->get();
+        } catch (\Exception $e) {
+            logger('Client search error: ' . $e->getMessage());
+            $this->clientResults = [];
+        }
     }
 
     public function selectClient(string $id): void
@@ -83,31 +95,48 @@ class NewReservation extends Component
             $this->addError('clientSearch', 'Selected client is not eligible.');
             return;
         }
-        $this->selectedClient = $client;
+        $this->selectedClientId = (int) $id;
         $this->clientSearch = $client->name;
         $this->clientResults = [];
+        $this->vesselSearch = '';
+        $this->selectedVesselId = null;
         $this->loadVessels();
     }
     public function loadVessels(): void
     {
-        if (!$this->selectedClient) {
+        if (!$this->selectedClientId) {
             $this->vesselResults = [];
             return;
         }
 
-        $this->vesselResults = Vessel::ownedBy($this->selectedClient->id)
-            ->active()
-            ->get();
+        $query = Vessel::ownedBy($this->selectedClientId)->active();
+        
+        if (!empty($this->vesselSearch)) {
+            $query->where('name', 'like', '%' . $this->vesselSearch . '%');
+        }
+        
+        $this->vesselResults = $query->get();
+    }
+
+    public function updatedVesselSearch(): void
+    {
+        $this->loadVessels();
+    }
+
+    public function selectBookingType(string $type): void
+    {
+        $this->bookingType = $type;
+        $this->step = 2;
     }
 
     public function selectVessel(string $id): void
     {
-        if (! $this->selectedClient) {
+        if (! $this->selectedClientId) {
             $this->addError('vesselSearch', 'Select a client first.');
             return;
         }
 
-        $vessel = Vessel::ownedBy($this->selectedClient->id)
+        $vessel = Vessel::ownedBy($this->selectedClientId)
                         ->active()
                         ->find($id);
 
@@ -116,7 +145,9 @@ class NewReservation extends Component
             return;
         }
 
-        $this->selectedVessel = $vessel;
+        $this->selectedVesselId = $id;
+        $this->vesselSearch = $vessel->name;
+        $this->vesselResults = [];
     }
 
     public function updatedSelectedProperty($value): void
@@ -139,10 +170,8 @@ class NewReservation extends Component
 
     public function calculateAvailability(): void
     {
-        // Step-specific validation
         $this->validate($this->rulesAvailability());
 
-        // Derive the window without mutating the bound inputs
         [$start, $end] = $this->buildStartEndFromInputs();
         $now = now();
 
@@ -158,7 +187,6 @@ class NewReservation extends Component
             $slotQuery->whereHas('zone.block', fn($q) => $q->where('property_id', $this->selectedProperty));
         }
 
-        // Exclude slots with overlapping, non-cancelled, non-expired bookings
         $slotQuery->whereDoesntHave('bookings', function ($q) use ($start, $end, $now) {
             $q->where('status', '!=', 'cancelled')
               ->where(function ($q2) use ($start, $end) {
@@ -176,22 +204,17 @@ class NewReservation extends Component
     }
     public function createBooking()
     {
-        $this->validate([
-            'bookingType' => 'required|string',
-            'selectedClient' => 'required',
-            'selectedVessel' => 'required',
-            'startDate' => 'required|date',
-            'endDate' => 'required|date|after:startDate',
-            'selectedSlot' => 'required',
-        ]);
+        $this->validate();
+
+        [$startDateTime, $endDateTime] = $this->buildStartEndFromInputs();
 
         $booking = Booking::create([
-            'booking_number' => 'BK-' . Str::upper(Str::random(8)),
-            'user_id' => $this->selectedClient->id,
-            'vessel_id' => $this->selectedVessel->id,
+            'booking_number' => $this->generateBookingNumber(),
+            'user_id' => $this->selectedClientId,
+            'vessel_id' => $this->selectedVesselId,
             'slot_id' => $this->selectedSlot,
-            'start_date' => $this->startDate,
-            'end_date' => $this->endDate,
+            'start_date' => $startDateTime,
+            'end_date' => $endDateTime,
             'status' => 'pending',
             'booking_type' => $this->bookingType,
             'additional_data' => [
@@ -213,6 +236,58 @@ class NewReservation extends Component
 
         session()->flash('success', 'Booking created successfully.');
         return redirect()->route('admin.bookings.new');
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'bookingType' => 'required|string',
+            'selectedClientId' => 'required|integer|exists:users,id',
+            'selectedVesselId' => 'required|integer|exists:vessels,id',
+            'startDate' => 'required|date',
+            'startTime' => 'required|date_format:H:i',
+            'endDate' => 'required|date|after_or_equal:startDate',
+            'endTime' => 'required|date_format:H:i',
+            'selectedSlot' => 'required|integer|exists:slots,id',
+        ];
+    }
+
+    protected function rulesAvailability(): array
+    {
+        return [
+            'startDate' => 'required|date',
+            'startTime' => 'required|date_format:H:i',
+            'endDate' => 'required|date|after_or_equal:startDate',
+            'endTime' => 'required|date_format:H:i',
+        ];
+    }
+
+    protected function buildStartEndFromInputs(): array
+    {
+        $start = Carbon::createFromFormat('Y-m-d H:i', $this->startDate . ' ' . $this->startTime);
+        $end = Carbon::createFromFormat('Y-m-d H:i', $this->endDate . ' ' . $this->endTime);
+        
+        return [$start, $end];
+    }
+
+    protected function generateBookingNumber(): string
+    {
+        return 'BK-' . Str::upper(Str::random(8));
+    }
+
+    public function getSelectedClientProperty(): ?User
+    {
+        return $this->selectedClientId ? User::find($this->selectedClientId) : null;
+    }
+
+    public function getSelectedVesselProperty(): ?Vessel
+    {
+        return $this->selectedVesselId ? Vessel::find($this->selectedVesselId) : null;
+    }
+
+    public function getServicesListProperty(): array
+    {
+        return self::SERVICES_LIST;
     }
 
     public function render()

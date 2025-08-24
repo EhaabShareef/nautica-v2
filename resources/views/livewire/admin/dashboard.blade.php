@@ -145,7 +145,7 @@
                 </a>
 
                 <!-- Booking Management -->
-                <a href="{{ route('admin.bookings.new') }}" class="nav-card management-nav-item text-white" data-section="bookings" style="text-decoration: none; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);">
+                <a href="{{ route('admin.bookings.index') }}" class="nav-card management-nav-item text-white" data-section="bookings" style="text-decoration: none; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);">
                     <div class="nav-card-inner">
                         <div class="nav-icon">
                             <x-heroicon name="calendar-days" class="w-6 h-6 text-white stroke-1" />
