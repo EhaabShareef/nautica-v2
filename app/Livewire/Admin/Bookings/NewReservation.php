@@ -101,7 +101,21 @@ class NewReservation extends Component
 
     public function selectVessel(string $id): void
     {
-        $this->selectedVessel = Vessel::find($id);
+        if (! $this->selectedClient) {
+            $this->addError('vesselSearch', 'Select a client first.');
+            return;
+        }
+
+        $vessel = Vessel::ownedBy($this->selectedClient->id)
+                        ->active()
+                        ->find($id);
+
+        if (! $vessel) {
+            $this->addError('vesselSearch', 'Invalid vessel for this client.');
+            return;
+        }
+
+        $this->selectedVessel = $vessel;
     }
 
     public function updatedSelectedProperty($value): void
