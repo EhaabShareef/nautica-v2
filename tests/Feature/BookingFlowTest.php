@@ -9,8 +9,10 @@ use App\Models\Block;
 use App\Models\Zone;
 use App\Models\Slot;
 use App\Models\User;
+use App\Models\Vessel;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class BookingFlowTest extends TestCase
@@ -25,17 +27,23 @@ class BookingFlowTest extends TestCase
         $zone = Zone::create(['block_id' => $block->id, 'name' => 'Z1', 'code' => 'Z1']);
         $slot = Slot::create(['zone_id' => $zone->id, 'code' => 'S1', 'location' => 'Dock 1']);
 
+        $vessel = Vessel::create([
+            'owner_client_id' => $user->id,
+            'name' => 'Test Vessel',
+            'registration_number' => 'REG123',
+            'is_active' => true,
+        ]);
+
         $start = Carbon::now();
         $end = (clone $start)->addHour();
 
         $booking = Booking::create([
-            'client_id' => $user->id,
-            'property_id' => $property->id,
-            'block_id' => $block->id,
-            'zone_id' => $zone->id,
+            'booking_number' => 'BK-' . Str::random(8),
+            'user_id' => $user->id,
+            'vessel_id' => $vessel->id,
             'slot_id' => $slot->id,
-            'start_at' => $start,
-            'end_at' => $end,
+            'start_date' => $start,
+            'end_date' => $end,
             'status' => 'on_hold',
             'hold_expires_at' => Carbon::now()->subHour(),
         ]);
