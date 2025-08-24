@@ -143,7 +143,8 @@ class VesselForm extends Component
         // Clear selected owner if search doesn't match
         if ($this->owner_client_id) {
             $selectedOwner = collect($this->eligibleOwners)->firstWhere('id', $this->owner_client_id);
-            if (!$selectedOwner || !str_contains(strtolower($selectedOwner['display_name']), strtolower($this->ownerSearch))) {
+            $haystack = strtolower(($selectedOwner['display_name'] ?? '') . ' ' . ($selectedOwner['id_card'] ?? ''));
+            if (!$selectedOwner || !str_contains($haystack, strtolower($this->ownerSearch))) {
                 $this->owner_client_id = null;
             }
         }
@@ -157,7 +158,8 @@ class VesselForm extends Component
         // Clear selected renter if search doesn't match
         if ($this->renter_client_id) {
             $selectedRenter = collect($this->eligibleRenters)->firstWhere('id', $this->renter_client_id);
-            if (!$selectedRenter || !str_contains(strtolower($selectedRenter['display_name']), strtolower($this->renterSearch))) {
+            $haystack = strtolower(($selectedRenter['display_name'] ?? '') . ' ' . ($selectedRenter['id_card'] ?? ''));
+            if (!$selectedRenter || !str_contains($haystack, strtolower($this->renterSearch))) {
                 $this->renter_client_id = null;
             }
         }
