@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class NewReservation extends Component
@@ -52,6 +53,23 @@ class NewReservation extends Component
     ];
     public array $selectedServices = [];
 
+    /**
+     * Centralized step navigation
+     */
+    public function goToStep(int $target): void
+    {
+        logger()->info('Step transition', ['from' => $this->step, 'to' => $target]);
+
+        if ($target === 3) {
+            $this->validate([
+                'selectedClientId' => 'required|integer|exists:users,id',
+                'selectedVesselId' => 'required|integer|exists:vessels,id',
+            ]);
+        }
+
+        $this->step = $target;
+    }
+
     public function mount(): void
     {
         $this->properties = Property::where('is_active', true)->get();
@@ -82,6 +100,7 @@ class NewReservation extends Component
                 })
                 ->limit(10)
                 ->get();
+            logger()->info('Client search', ['term' => $this->clientSearch, 'count' => $this->clientResults->count()]);
         } catch (\Exception $e) {
             logger('Client search error: ' . $e->getMessage());
             $this->clientResults = [];
@@ -116,6 +135,7 @@ class NewReservation extends Component
         }
         
         $this->vesselResults = $query->get();
+        logger()->info('Vessel search', ['term' => $this->vesselSearch, 'count' => $this->vesselResults->count()]);
     }
 
     public function updatedVesselSearch(): void
@@ -150,6 +170,18 @@ class NewReservation extends Component
         $this->vesselResults = [];
     }
 
+    public function selectSlot(int $slotId): void
+    {
+        $slot = Slot::where('is_active', true)->find($slotId);
+        if (! $slot) {
+            $this->addError('selectedSlot', 'Invalid slot selected.');
+            return;
+        }
+
+        $this->selectedSlot = (string) $slotId;
+        $this->step = 6;
+    }
+
     public function updatedSelectedProperty($value): void
     {
         $this->blocks = Block::where('property_id', $value)
@@ -174,6 +206,8 @@ class NewReservation extends Component
 
         [$start, $end] = $this->buildStartEndFromInputs();
         $now = now();
+
+        $startTime = microtime(true);
 
         $slotQuery = Slot::query()
             ->with('zone.block.property')
@@ -200,6 +234,10 @@ class NewReservation extends Component
         });
 
         $this->availableSlots = $slotQuery->orderBy('code')->get();
+
+        $durationMs = (int) ((microtime(true) - $startTime) * 1000);
+        logger()->info('Availability query', ['count' => $this->availableSlots->count(), 'duration_ms' => $durationMs]);
+
         $this->step = 5;
     }
     public function createBooking()
@@ -208,31 +246,50 @@ class NewReservation extends Component
 
         [$startDateTime, $endDateTime] = $this->buildStartEndFromInputs();
 
-        $booking = Booking::create([
-            'booking_number' => $this->generateBookingNumber(),
-            'user_id' => $this->selectedClientId,
-            'vessel_id' => $this->selectedVesselId,
-            'slot_id' => $this->selectedSlot,
-            'start_date' => $startDateTime,
-            'end_date' => $endDateTime,
-            'status' => 'pending',
-            'booking_type' => $this->bookingType,
-            'additional_data' => [
-                'services' => $this->selectedServices,
-                'preferences' => [
-                    'property_id' => $this->selectedProperty,
-                    'block_id' => $this->selectedBlock,
-                    'zone_id' => $this->selectedZone,
-                ],
-            ],
-        ]);
+        $booking = null;
 
-        BookingLog::create([
-            'booking_id' => $booking->id,
-            'user_id' => Auth::id(),
-            'action' => 'created',
-            'new_status' => 'pending',
-        ]);
+        DB::transaction(function () use (&$booking, $startDateTime, $endDateTime) {
+            $overlap = Booking::where('slot_id', $this->selectedSlot)
+                ->where('status', '!=', 'cancelled')
+                ->where('start_date', '<', $endDateTime)
+                ->where('end_date', '>', $startDateTime)
+                ->lockForUpdate()
+                ->exists();
+
+            if ($overlap) {
+                throw ValidationException::withMessages([
+                    'selectedSlot' => 'The selected slot is no longer available.',
+                ]);
+            }
+
+            $booking = Booking::create([
+                'booking_number' => $this->generateBookingNumber(),
+                'user_id' => $this->selectedClientId,
+                'vessel_id' => $this->selectedVesselId,
+                'slot_id' => $this->selectedSlot,
+                'start_date' => $startDateTime,
+                'end_date' => $endDateTime,
+                'status' => 'pending',
+                'booking_type' => $this->bookingType,
+                'additional_data' => [
+                    'services' => $this->selectedServices,
+                    'preferences' => [
+                        'property_id' => $this->selectedProperty,
+                        'block_id' => $this->selectedBlock,
+                        'zone_id' => $this->selectedZone,
+                    ],
+                ],
+            ]);
+
+            BookingLog::create([
+                'booking_id' => $booking->id,
+                'user_id' => Auth::id(),
+                'action' => 'created',
+                'new_status' => 'pending',
+            ]);
+        });
+
+        logger()->info('Booking created', ['booking_id' => $booking->id]);
 
         session()->flash('success', 'Booking created successfully.');
         return redirect()->route('admin.bookings.new');

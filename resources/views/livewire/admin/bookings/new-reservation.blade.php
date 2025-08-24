@@ -80,7 +80,7 @@
                 @if($bookingType)
                     <div class="step-actions">
                         <div></div> <!-- Spacer -->
-                        <button type="button" class="btn-primary" wire:click="$set('step',2)">
+                        <button type="button" class="btn-primary" wire:click="goToStep(2)" wire:loading.attr="disabled" wire:target="goToStep">
                             Continue with {{ ucfirst($bookingType) }}
                             <x-heroicon name="arrow-right" class="w-4 h-4" />
                         </button>
@@ -116,9 +116,10 @@
                         @if (!empty($clientResults))
                             <div class="search-results">
                                 @foreach ($clientResults as $c)
-                                    <button type="button" 
+                                    <button type="button"
                                             class="search-result-item"
-                                            wire:click="selectClient('{{ $c->id }}')">
+                                            wire:click="selectClient('{{ $c->id }}')"
+                                            wire:key="client-{{ $c->id }}">
                                         <div class="search-result-info">
                                             <span class="search-result-name">{{ $c->name }}</span>
                                             <span class="search-result-email">{{ $c->email }}</span>
@@ -148,9 +149,10 @@
                             @if ($vesselResults && $vesselResults->count())
                                 <div class="search-results">
                                     @foreach ($vesselResults as $v)
-                                        <button type="button" 
+                                        <button type="button"
                                                 class="search-result-item"
-                                                wire:click="selectVessel('{{ $v->id }}')">
+                                                wire:click="selectVessel('{{ $v->id }}')"
+                                                wire:key="vessel-{{ $v->id }}">
                                             <div class="search-result-info">
                                                 <span class="search-result-name">{{ $v->display_name }}</span>
                                             </div>
@@ -171,13 +173,15 @@
                 </div>
                 
                 <div class="step-actions">
-                    <button type="button" class="btn-secondary" wire:click="$set('step',1)">
+                    <button type="button" class="btn-secondary" wire:click="goToStep(1)">
                         <x-heroicon name="arrow-left" class="w-4 h-4" />
                         Back
                     </button>
-                    <button type="button" 
+                    <button type="button"
                             class="btn-primary {{ !$this->selectedVessel ? 'disabled' : '' }}"
-                            wire:click="$set('step',3)"
+                            wire:click="goToStep(3)"
+                            wire:loading.attr="disabled"
+                            wire:target="goToStep"
                             @disabled(!$this->selectedVessel)>
                         Next
                         <x-heroicon name="arrow-right" class="w-4 h-4" />
@@ -232,11 +236,11 @@
                 </div>
                 
                 <div class="step-actions">
-                    <button type="button" class="btn-secondary" wire:click="$set('step',2)">
+                    <button type="button" class="btn-secondary" wire:click="goToStep(2)">
                         <x-heroicon name="arrow-left" class="w-4 h-4" />
                         Back
                     </button>
-                    <button type="button" class="btn-primary" wire:click="$set('step',4)">
+                    <button type="button" class="btn-primary" wire:click="goToStep(4)" wire:loading.attr="disabled" wire:target="goToStep">
                         Next
                         <x-heroicon name="arrow-right" class="w-4 h-4" />
                     </button>
@@ -295,11 +299,11 @@
                 </div>
                 
                 <div class="step-actions">
-                    <button type="button" class="btn-secondary" wire:click="$set('step',3)">
+                    <button type="button" class="btn-secondary" wire:click="goToStep(3)">
                         <x-heroicon name="arrow-left" class="w-4 h-4" />
                         Back
                     </button>
-                    <button type="button" class="btn-primary" wire:click="calculateAvailability">
+                    <button type="button" class="btn-primary" wire:click="calculateAvailability" wire:loading.attr="disabled" wire:target="calculateAvailability">
                         Check Availability
                         <x-heroicon name="magnifying-glass" class="w-4 h-4" />
                     </button>
@@ -321,7 +325,7 @@
                         <x-heroicon name="exclamation-triangle" class="w-12 h-12 text-amber-500 mx-auto mb-4" />
                         <h3>No Available Slots</h3>
                         <p>There are no available slots for the selected timeframe. Please try different dates or times.</p>
-                        <button type="button" class="btn-secondary" wire:click="$set('step',4)">
+                        <button type="button" class="btn-secondary" wire:click="goToStep(4)">
                             Change Date/Time
                         </button>
                     </div>
@@ -330,7 +334,10 @@
                         @foreach ($availableSlots as $slot)
                             <button type="button"
                                     class="slot-card {{ $selectedSlot == $slot->id ? 'selected' : '' }}"
-                                    wire:click="$set('selectedSlot','{{ $slot->id }}'); $set('step',6)">
+                                    wire:key="slot-{{ $slot->id }}"
+                                    wire:click="selectSlot({{ $slot->id }})"
+                                    wire:loading.attr="disabled"
+                                    wire:target="selectSlot">
                                 <div class="slot-info">
                                     <h4>{{ $slot->code }}</h4>
                                     <div class="slot-location">
@@ -348,7 +355,7 @@
                 @endif
                 
                 <div class="step-actions">
-                    <button type="button" class="btn-secondary" wire:click="$set('step',4)">
+                    <button type="button" class="btn-secondary" wire:click="goToStep(4)">
                         <x-heroicon name="arrow-left" class="w-4 h-4" />
                         Back
                     </button>
@@ -367,7 +374,7 @@
                 
                 <div class="services-section">
                     @foreach ($this->servicesList as $code => $label)
-                        <label class="service-item">
+                        <label class="service-item" wire:key="service-{{ $code }}">
                             <input type="checkbox" wire:model="selectedServices" value="{{ $code }}" class="service-checkbox">
                             <div class="service-info">
                                 <h4>{{ $label }}</h4>
@@ -381,11 +388,11 @@
                 </div>
                 
                 <div class="step-actions">
-                    <button type="button" class="btn-secondary" wire:click="$set('step',5)">
+                    <button type="button" class="btn-secondary" wire:click="goToStep(5)">
                         <x-heroicon name="arrow-left" class="w-4 h-4" />
                         Back
                     </button>
-                    <button type="button" class="btn-success" wire:click="createBooking">
+                    <button type="button" class="btn-success" wire:click="createBooking" wire:loading.attr="disabled" wire:target="createBooking">
                         <x-heroicon name="check-circle" class="w-5 h-5" />
                         Create Booking
                     </button>
