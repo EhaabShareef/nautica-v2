@@ -23,7 +23,7 @@
         </div>
 
         {{-- Stats Cards --}}
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
+        <div class="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
             @php
                 $stats = app(\App\Services\VesselService::class)->getVesselStats();
             @endphp

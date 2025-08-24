@@ -94,7 +94,7 @@
                                        wire:model.live.debounce.300ms="ownerSearch"
                                        @focus="open = true"
                                        class="form-input w-full {{ $errors->has('owner_client_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
-                                       placeholder="Search for owner...">
+                                       placeholder="Search by name or ID...">
                                 
                                 @if($showOwnerDropdown && count($eligibleOwners) > 0)
                                     <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -107,7 +107,9 @@
                                                 </div>
                                                 <div>
                                                     <div class="text-sm font-medium">{{ $client['display_name'] }}</div>
-                                                    <div class="text-xs text-muted-foreground">{{ $client['email'] }}</div>
+                                                    @if($client['id_card'])
+                                                        <div class="text-xs text-muted-foreground">ID: {{ $client['id_card'] }}</div>
+                                                    @endif
                                                 </div>
                                             </button>
                                         @endforeach
@@ -131,7 +133,7 @@
                                            wire:model.live.debounce.300ms="renterSearch"
                                            @focus="open = true"
                                            class="form-input flex-1 {{ $errors->has('renter_client_id') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
-                                           placeholder="Search for renter...">
+                                           placeholder="Search by name or ID...">
                                     @if($renter_client_id)
                                         <button type="button" 
                                                 wire:click="clearRenter"
@@ -152,7 +154,9 @@
                                                 </div>
                                                 <div>
                                                     <div class="text-sm font-medium">{{ $client['display_name'] }}</div>
-                                                    <div class="text-xs text-muted-foreground">{{ $client['email'] }}</div>
+                                                    @if($client['id_card'])
+                                                        <div class="text-xs text-muted-foreground">ID: {{ $client['id_card'] }}</div>
+                                                    @endif
                                                 </div>
                                             </button>
                                         @endforeach
