@@ -66,6 +66,12 @@ class BlockForm extends Component
         $this->validate();
 
         try {
+            $property = Property::find($this->property_id);
+            if ($this->is_active && $property && !$property->is_active) {
+                session()->flash('error', 'Cannot activate block because its property is inactive.');
+                return;
+            }
+
             DB::transaction(function () {
                 $data = [
                     'property_id' => $this->property_id,
@@ -102,7 +108,7 @@ class BlockForm extends Component
             ]);
 
             // Flash error message to user
-            session()->flash('error', 'Failed to save block. Please check your input and try again.');
+            session()->flash('error', $e->getMessage() ?: 'Failed to save block. Please check your input and try again.');
 
             // Don't close modal on failure so user can retry
         }
