@@ -69,7 +69,8 @@ class VesselService
                 }
                 
                 // Prevent renter = owner
-                if ($data['renter_client_id'] == $data['owner_client_id']) {
+                if ($data['renter_client_id'] == $data['owner_client_id']
+                    && !config('nautica.vessels.allow_owner_renter_same', false)) {
                     $validator->errors()->add('renter_client_id', 'Renter cannot be the same as the owner.');
                 }
             }
@@ -97,21 +98,22 @@ class VesselService
      * Get eligible clients for vessel assignment (owners/renters).
      *
      * @param string $search
-     * @param int $limit
+     * @param int|null $limit
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getEligibleClients(string $search = '', int $limit = 50)
+    public function getEligibleClients(string $search = '', ?int $limit = null)
     {
+        $limit = $limit ?? config('nautica.vessels.search_limit', 50);
+
         $query = User::clients()
             ->active()
             ->notBlacklisted()
-            ->select(['id', 'name', 'email', 'id_card'])
+            ->select(['id', 'name', 'id_card'])
             ->orderBy('name');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%')
                   ->orWhere('id_card', 'like', '%' . $search . '%');
             });
         }
@@ -137,7 +139,8 @@ class VesselService
                 ]);
             }
 
-            if ($renterClientId == $vessel->owner_client_id) {
+            if ($renterClientId == $vessel->owner_client_id
+                && !config('nautica.vessels.allow_owner_renter_same', false)) {
                 throw ValidationException::withMessages([
                     'renter_client_id' => 'Renter cannot be the same as the owner.'
                 ]);

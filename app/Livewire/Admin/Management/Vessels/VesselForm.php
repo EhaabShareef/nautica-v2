@@ -202,21 +202,21 @@ class VesselForm extends Component
 
     public function loadEligibleClients($ownerSearch = '', $renterSearch = '')
     {
-        $this->eligibleOwners = $this->vesselService->getEligibleClients($ownerSearch, 20)
+        $this->eligibleOwners = $this->vesselService->getEligibleClients($ownerSearch)
             ->map(function ($client) {
                 return [
                     'id' => $client->id,
                     'display_name' => $client->display_name,
-                    'email' => $client->email
+                    'id_card' => $client->id_card,
                 ];
             })->toArray();
 
-        $this->eligibleRenters = $this->vesselService->getEligibleClients($renterSearch, 20)
+        $this->eligibleRenters = $this->vesselService->getEligibleClients($renterSearch)
             ->map(function ($client) {
                 return [
                     'id' => $client->id,
                     'display_name' => $client->display_name,
-                    'email' => $client->email
+                    'id_card' => $client->id_card,
                 ];
             })->toArray();
     }

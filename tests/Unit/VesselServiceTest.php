@@ -90,4 +90,18 @@ class VesselServiceTest extends TestCase
             'registration_number' => 'REG-004',
         ]);
     }
+
+    public function test_get_eligible_clients_searches_by_id_card(): void
+    {
+        $client = User::factory()->create([
+            'user_type' => 'client',
+            'is_active' => true,
+            'id_card' => 'ID-12345',
+        ]);
+
+        $service = new VesselService();
+        $results = $service->getEligibleClients('12345');
+
+        $this->assertTrue($results->contains('id', $client->id));
+    }
 }
