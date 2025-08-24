@@ -77,12 +77,16 @@ class NewReservation extends Component
 
     public function selectClient(string $id): void
     {
-        $this->selectedClient = User::find($id);
-        $this->clientSearch = $this->selectedClient?->name ?? '';
+        $client = User::clients()->active()->notBlacklisted()->find($id);
+        if (!$client) {
+            $this->addError('clientSearch', 'Selected client is not eligible.');
+            return;
+        }
+        $this->selectedClient = $client;
+        $this->clientSearch = $client->name;
         $this->clientResults = [];
         $this->loadVessels();
     }
-
     public function loadVessels(): void
     {
         if (!$this->selectedClient) {
