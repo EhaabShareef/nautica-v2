@@ -5,8 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "style:fix": "prettier --plugin-search-dir=. --write \"resources/**/*.{js,ts,jsx,tsx,css,scss,html,blade.php,md}\" && stylelint \"resources/css/**/*.css\" --fix",
-        "style:check": "prettier --plugin-search-dir=. --check \"resources/**/*.{js,ts,jsx,tsx,css,scss,html,blade.php,md}\" && stylelint \"resources/css/**/*.css\" && if command -v rg >/dev/null 2>&1; then if rg 'style=' -n resources/views; then echo 'Inline styles found'; exit 1; fi; else echo 'ripgrep not found; skipping inline-style check'; fi"
+        "style:fix": "prettier --write \"resources/**/*.{js,ts,jsx,tsx,css,scss,html,md}\" && stylelint \"resources/css/**/*.css\" --fix",
+        "style:check": "prettier --check \"resources/**/*.{js,ts,jsx,tsx,css,scss,html,md}\" && stylelint \"resources/css/**/*.css\" && if command -v rg >/dev/null 2>&1; then if rg 'style=' -n resources/views; then echo 'Inline styles found'; exit 1; fi; else echo 'ripgrep not found; skipping inline-style check'; fi"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

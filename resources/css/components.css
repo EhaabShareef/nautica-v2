@@ -27,6 +27,11 @@
   .btn:active {
     transform: translateY(0);
   }
+  .btn:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
 
   .btn-secondary {
     display: inline-flex;
@@ -56,6 +61,11 @@
   .btn-secondary:active {
     transform: translateY(0);
   }
+  .btn-secondary:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
 
   .btn-destructive {
     display: inline-flex;
@@ -78,6 +88,14 @@
   .btn-destructive:hover {
     background-color: color-mix(in oklch, var(--destructive) 10%, transparent);
     color: var(--destructive);
+  }
+  .btn-destructive:active {
+    transform: translateY(0);
+  }
+  .btn-destructive:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--ring);
   }
 
   .card {
