@@ -65,8 +65,11 @@
 
             <div class="flex justify-between">
                 <button type="button" class="btn px-4 py-2" wire:click="$set('step',1)">Back</button>
-                <button type="button" class="btn px-4 py-2 bg-blue-600 text-white" wire:click="$set('step',3)"
-                    @disabled="!$selectedVessel">Next</button>
+                <button type="button" class="btn px-4 py-2 bg-blue-600 text-white"
+                        wire:click="$set('step',3)"
+                        @disabled(!$selectedVessel)>
+                    Next
+                </button>
             </div>
         </div>
     @endif
