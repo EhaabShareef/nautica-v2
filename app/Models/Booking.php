@@ -16,13 +16,14 @@ class Booking extends Model
 
     protected $fillable = [
         'booking_number', 'user_id', 'vessel_id', 'slot_id',
-        'start_date', 'end_date', 'status', 'total_amount',
-        'additional_data', 'notes'
+        'start_date', 'end_date', 'hold_expires_at', 'status', 'booking_type',
+        'total_amount', 'additional_data', 'notes'
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'hold_expires_at' => 'datetime',
         'total_amount' => 'decimal:2',
         'additional_data' => 'array',
     ];
