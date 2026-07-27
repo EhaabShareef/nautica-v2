@@ -69,6 +69,12 @@ class ZoneForm extends Component
         $this->validate();
 
         try {
+            $block = Block::with('property')->find($this->block_id);
+            if ($this->is_active && $block && (! $block->is_active || ! $block->property->is_active)) {
+                session()->flash('error', 'Cannot activate zone because its parent block or property is inactive.');
+                return;
+            }
+
             DB::transaction(function () {
                 $data = [
                     'block_id' => $this->block_id,
@@ -101,7 +107,7 @@ class ZoneForm extends Component
                 'error' => $e->getMessage(),
             ]);
 
-            session()->flash('error', 'Failed to save zone. Please check your input and try again.');
+            session()->flash('error', $e->getMessage() ?: 'Failed to save zone. Please check your input and try again.');
         }
     }
 

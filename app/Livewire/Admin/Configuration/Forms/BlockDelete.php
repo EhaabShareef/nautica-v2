@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Configuration\Forms;
 
 use App\Models\Block;
+use App\Models\Slot;
+use App\Models\Booking;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -35,15 +37,31 @@ class BlockDelete extends Component
         }
 
         try {
+            $slotIds = Slot::whereHas('zone', function ($q) {
+                $q->where('block_id', $this->block->id);
+            })->pluck('id');
+
+            if ($slotIds->isNotEmpty()) {
+                $hasBookings = Booking::whereIn('slot_id', $slotIds)
+                    ->whereIn('status', ['confirmed', 'pending'])
+                    ->where('end_date', '>=', now())
+                    ->exists();
+
+                if ($hasBookings) {
+                    session()->flash('error', 'This block cannot be inactivated or deleted because it contains active or upcoming bookings.');
+                    return;
+                }
+            }
+
             DB::transaction(function () {
                 $name = $this->block->name;
                 $this->block->delete();
-                
+
                 // Flash success message and dispatch events within transaction
                 session()->flash('message', "Block '{$name}' deleted successfully!");
                 $this->dispatch('block:deleted');
             });
-            
+
             // Close modal only after successful transaction
             $this->closeModal();
             

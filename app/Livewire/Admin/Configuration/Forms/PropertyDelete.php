@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Configuration\Forms;
 
 use App\Models\Property;
+use App\Models\Slot;
+use App\Models\Booking;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -31,10 +33,26 @@ class PropertyDelete extends Component
         if (!$this->property) return;
 
         try {
+            $slotIds = Slot::whereHas('zone.block', function ($q) {
+                $q->where('property_id', $this->property->id);
+            })->pluck('id');
+
+            if ($slotIds->isNotEmpty()) {
+                $hasBookings = Booking::whereIn('slot_id', $slotIds)
+                    ->whereIn('status', ['confirmed', 'pending'])
+                    ->where('end_date', '>=', now())
+                    ->exists();
+
+                if ($hasBookings) {
+                    session()->flash('error', 'This property cannot be inactivated or deleted because it contains active or upcoming bookings.');
+                    return;
+                }
+            }
+
             DB::transaction(function () {
                 $propertyName = $this->property->name;
                 $this->property->delete();
-                
+
                 // Flash success message and dispatch events within transaction
                 session()->flash('message', "Property '{$propertyName}' and all associated data deleted successfully!");
                 $this->dispatch('property:deleted');

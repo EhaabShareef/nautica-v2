@@ -33,7 +33,7 @@ class VesselReactivate extends Component
         }
 
         // Re-fetch vessel to avoid TOCTOU (Time of Check, Time of Use) issues
-        $vessel = Vessel::find($this->vessel->id);
+        $vessel = Vessel::with('owner')->find($this->vessel->id);
 
         if (!$vessel) {
             $this->dispatch('showToast', [
@@ -49,6 +49,15 @@ class VesselReactivate extends Component
             $this->dispatch('showToast', [
                 'type' => 'error',
                 'message' => 'You are not authorized to reactivate this vessel.'
+            ]);
+            $this->closeModal();
+            return;
+        }
+
+        if (!$vessel->owner || !$vessel->owner->is_active) {
+            $this->dispatch('showToast', [
+                'type' => 'error',
+                'message' => 'Owner is inactive. Activate owner to reactivate vessel.'
             ]);
             $this->closeModal();
             return;
